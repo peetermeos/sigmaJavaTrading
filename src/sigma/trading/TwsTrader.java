@@ -1,5 +1,6 @@
 package sigma.trading;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.Vector;
 
@@ -14,12 +15,15 @@ import com.ib.client.EWrapper;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
+import com.ib.client.OrderType;
 import com.ib.client.TagValue;
 
 import sigma.utils.Logger;
+import sigma.utils.LogLevel;
 
 public class TwsTrader implements EWrapper {
 	
+	// TWS internals
 	private EJavaSignal m_signal = new EJavaSignal();
     private EReader m_reader;
     private EClientSocket tws;
@@ -35,6 +39,12 @@ public class TwsTrader implements EWrapper {
     private Order longTrail;
     private Order shortTrail;
     
+    private double spotPrice = 0;
+    private double delta = 0;
+    private double trailAmt = 0;
+    private double q = 0;
+    
+    // Threads
     private Logger logger;
     private Thread msgThread;
     
@@ -46,22 +56,34 @@ public class TwsTrader implements EWrapper {
         }
     }
 	
-	public TwsTrader() throws InterruptedException {
-		logger = new Logger();
+	public TwsTrader() {
+		logger = new Logger(LogLevel.INFO);
 		logger.log("Sigma News Trader init.");
 		
-		tws = new EClientSocket(this, m_signal);
+			tws = new EClientSocket(this, m_signal);
 	}
 	
-	public void twsConnect() {
-	    tws.eConnect("127.0.0.1", 4001, 0);
+	public void twsConnect(String host, int port) {
+	    tws.eConnect(host, port, 55);
+	    
+	    while (! tws.isConnected())
+			try {
+				Thread.sleep(500);
+			} catch (Exception e) {
+				logger.error(e);
+			}
+	    logger.log("Connected");
 
 	    m_reader = new EReader(tws, m_signal);
 	    m_reader.start();
 	    
 	    Task myTask = new Task();
 	    msgThread = new Thread(myTask, "T1");
-	    msgThread.start();
+	    msgThread.start();	
+	}
+	
+	public void twsConnect() {
+		twsConnect("127.0.0.1", 4001);
 	}
 	
 	public void doTrading() {
@@ -71,10 +93,15 @@ public class TwsTrader implements EWrapper {
 		
 		logger.log("Entering main trading loop");
 		try {
-			Thread.sleep(1000);
 			tws.reqCurrentTime();
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+
+			// Infinite loop until keypress
+			while (System.in.available() == 0) {
+				Thread.sleep(100);
+				// Here check open orders and adjust them if needed
+			}
+			
+		} catch (InterruptedException | IOException e) {
 			logger.error(e);
 		}
 		logger.log("Main trading loop finished");
@@ -82,10 +109,10 @@ public class TwsTrader implements EWrapper {
 	
 	public void twsDisconnect() {
 		logger.log("News trader exiting.");
-				
-		
+					
 		m_reader.interrupt();
 		msgThread.interrupt();
+		
 		tws.eDisconnect();
 	}
 	
@@ -106,6 +133,10 @@ public class TwsTrader implements EWrapper {
 		inst.secType("FUT");
 		inst.multiplier("1000");
 		inst.lastTradeDateOrContractMonth("201710");
+		
+		// Requesting contract details
+		logger.log("Requesting contract details");
+		tws.reqContractDetails(nextOrderID, inst);
 	}
 	
 	public void createOrders() {
@@ -115,20 +146,113 @@ public class TwsTrader implements EWrapper {
 		shortStop = new Order();
 		longTrail = new Order();
 		shortTrail = new Order();
+		
+		// Types
+		longStop.orderType(OrderType.STP_LMT);
+		shortStop.orderType(OrderType.STP_LMT);
+		longTrail.orderType(OrderType.TRAIL_LIMIT);
+		shortTrail.orderType(OrderType.TRAIL_LIMIT);
+		
+		// Actions
+		longStop.action("BUY");
+		shortStop.action("SELL");
+		longTrail.action("SELL");
+		shortTrail.action("BUY");
+		
+		// Quantities
+		q = 1;
+		longStop.totalQuantity(q);
+		shortStop.totalQuantity(q);
+		longTrail.totalQuantity(q);
+		longTrail.totalQuantity(q);
+		
+		// Prices
+		// First wait to have spot price
+		while (spotPrice == 0) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				logger.error(e);
+			}
+		}
+		
+		delta = 0.05;
+		trailAmt = 0.1;
+		
+		longStop.lmtPrice(spotPrice + delta);
+		longStop.transmit(false);
+		longStop.orderId(1001);
+		
+		shortStop.lmtPrice(spotPrice + delta);
+		shortStop.transmit(false);
+		shortStop.orderId(1002);
+		
+		longTrail.trailStopPrice(spotPrice);
+		longTrail.auxPrice(trailAmt);
+		longTrail.parentId(longStop.orderId());
+		longTrail.transmit(false);
+		
+		shortTrail.trailStopPrice(spotPrice);
+		shortTrail.auxPrice(trailAmt);
+		shortTrail.parentId(shortStop.orderId());
+		shortTrail.transmit(false);
+		
+		// OCO groupings and attached orders
+		longStop.ocaGroup("NT");
+		shortStop.ocaGroup("NT");
+		
+		logger.log("Placing orders");
+		//tws.placeOrder(nextOrderID, inst, longStop);
+		//tws.placeOrder(nextOrderID, inst, shortStop);
+		//tws.placeOrder(nextOrderID, inst, longTrail);
+		//tws.placeOrder(nextOrderID, inst, shortTrail;
 	}
 	
 	public void adjustOrders(double spotPrice) {
+		logger.log("Adjusting orders");
+		longStop.lmtPrice(spotPrice + delta);
+		shortStop.lmtPrice(spotPrice - delta);
+		longTrail.trailStopPrice(spotPrice);
+		shortTrail.trailStopPrice(spotPrice);
 		
+		logger.log("Placing orders");
+		//tws.placeOrder(nextOrderID, inst, longStop);
+		//tws.placeOrder(nextOrderID, inst, shortStop);
+		//tws.placeOrder(nextOrderID, inst, longTrail);
+		//tws.placeOrder(nextOrderID, inst, shortTrail;
+	}
+	
+	public void cancelOrders() {
+		// tws.cancelOrder(id);
 	}
 	
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
-		logger.log("Ticker " + tickerId + " field " + field + " price " + price);		
+		String tckType = null;
+		
+		switch(field) {
+		case 1: 
+			tckType = "bid";
+			break;
+		case 2:
+			tckType = "ask";
+			break;
+		case 4:
+			tckType = "last";
+			spotPrice = price;
+			break;
+		default:
+			tckType = null;
+		}
+		if (tckType != null) {
+			logger.log("Price ticker " + tickerId + " field " + tckType + " price " + price);	
+		}
+			
 	}
 
 	@Override
 	public void tickSize(int tickerId, int field, int size) {
-		logger.log("Ticker " + tickerId + " field " + field + " size " + size);	
+		logger.verbose("Size ticker " + tickerId + " field " + field + " size " + size);	
 	}
 
 	@Override
@@ -140,14 +264,12 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void tickGeneric(int tickerId, int tickType, double value) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Generic ticker " + tickerId + " type " + tickType + " value " + value);		
 	}
 
 	@Override
 	public void tickString(int tickerId, int tickType, String value) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("String ticker " + tickerId + " type " + tickType + " value " + value);		
 	}
 
 	@Override
@@ -161,26 +283,28 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice,
 			int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
-		// TODO Auto-generated method stub
+		logger.log("Order " + orderId + " status " + status +
+				" filled " + filled + " remaining " + remaining +
+				" avgFillPrice " + avgFillPrice);
 		
 	}
 
 	@Override
 	public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Order " + orderId + " contract" + contract.symbol() + 
+				" order " + order.action() + order.orderType().toString() +
+				" state " + orderState.toString());	
 	}
 
 	@Override
 	public void openOrderEnd() {
-		// TODO Auto-generated method stub
+		logger.log("Finishing opening order.");
 		
 	}
 
 	@Override
 	public void updateAccountValue(String key, String value, String currency, String accountName) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Update acct value :" + key + " value " + value + " " + currency);
 	}
 
 	@Override
@@ -192,14 +316,12 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void updateAccountTime(String timeStamp) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Account timestamp: " + timeStamp);	
 	}
 
 	@Override
 	public void accountDownloadEnd(String accountName) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("End of download for account: " + accountName);		
 	}
 
 	@Override
@@ -210,32 +332,28 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void contractDetails(int reqId, ContractDetails contractDetails) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Contract details req: " + reqId + " " + contractDetails.toString());
 	}
 
 	@Override
 	public void bondContractDetails(int reqId, ContractDetails contractDetails) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Bond contract details req: " + reqId + " " + contractDetails.toString());		
 	}
 
 	@Override
 	public void contractDetailsEnd(int reqId) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("End of contract details for req: " + reqId);		
 	}
 
 	@Override
 	public void execDetails(int reqId, Contract contract, Execution execution) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Exec details req: " + reqId + " contract " + 
+				contract.toString() + " execution " + execution.toString());
 	}
 
 	@Override
 	public void execDetailsEnd(int reqId) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("End of execution details for req: " + reqId);		
 	}
 
 	@Override
@@ -259,8 +377,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void managedAccounts(String accountsList) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Managed accounts :" + accountsList);		
 	}
 
 	@Override
@@ -278,8 +395,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void scannerParameters(String xml) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Scanner parameters received.");	
 	}
 
 	@Override
@@ -291,7 +407,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void scannerDataEnd(int reqId) {
-		// TODO Auto-generated method stub
+		logger.verbose("End of scanner data for req: " + reqId);
 		
 	}
 
@@ -309,8 +425,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void fundamentalData(int reqId, String data) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Fundamendal data for req: " + reqId + " : " + data);		
 	}
 
 	@Override
@@ -321,8 +436,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void tickSnapshotEnd(int reqId) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("End of snapshot tick data for req: " + reqId);		
 	}
 
 	@Override
@@ -333,37 +447,35 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void commissionReport(CommissionReport commissionReport) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Commission report " + commissionReport.toString());	
 	}
 
 	@Override
 	public void position(String account, Contract contract, double pos, double avgCost) {
-		// TODO Auto-generated method stub
+		logger.log("Position " + account + " : " + contract.toString() + 
+				" pos " + pos + " avg cost" + avgCost);
 		
 	}
 
 	@Override
 	public void positionEnd() {
-		logger.log("End of position report");
+		logger.verbose("End of position report");
 	}
 
 	@Override
 	public void accountSummary(int reqId, String account, String tag, String value, String currency) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Summary " + tag + value + " " + currency);		
 	}
 
 	@Override
 	public void accountSummaryEnd(int reqId) {
-		logger.log("End of account summary");
+		logger.log("End of account summary for req: " + reqId);
 		
 	}
 
 	@Override
 	public void verifyMessageAPI(String apiData) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Verify message API " + apiData);		
 	}
 
 	@Override
@@ -419,7 +531,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void connectAck() {
-		logger.log("Trying to connect");
+		logger.verbose("Trying to connect");
 	}
 
 	@Override
@@ -431,8 +543,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void positionMultiEnd(int reqId) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("End of multi position report for req: " + reqId);		
 	}
 
 	@Override
@@ -444,8 +555,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void accountUpdateMultiEnd(int reqId) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("End of multi account update for req: " + reqId);		
 	}
 
 	@Override
