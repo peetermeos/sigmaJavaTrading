@@ -20,6 +20,7 @@ import sigma.utils.Logger;
 /**
  * 
  * @author Peeter Meos
+ * @version 0.5
  *
  */
 public class TwsConnector implements EWrapper {
