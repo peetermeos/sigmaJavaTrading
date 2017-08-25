@@ -210,7 +210,7 @@ public class TwsConnector implements EWrapper {
 	@Override
 	public void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue,
 			double averageCost, double unrealizedPNL, double realizedPNL, String accountName) {
-		logger.verbose("Update portfolio");		
+		logger.verbose("Update portfolio");			
 	}
 
 	@Override

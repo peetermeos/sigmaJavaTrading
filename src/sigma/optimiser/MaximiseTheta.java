@@ -11,7 +11,7 @@ import cern.colt.matrix.tdouble.DoubleMatrix2D;
 
 /**
  * 
- * @author peeterm
+ * @author Peeter Meos
  *
  */
 public class MaximiseTheta {
@@ -22,8 +22,8 @@ public class MaximiseTheta {
 	 * @throws JOptimizerException
 	 */
 	public String optimise() throws JOptimizerException {
-		final DoubleFactory1D F1;
-		final DoubleFactory2D F2;
+		final DoubleFactory1D F1 = DoubleFactory1D.sparse;
+		final DoubleFactory2D F2 = DoubleFactory2D.sparse;
 		
 		// Objective function
 		DoubleMatrix1D c = F1.make(new double[] { 1, 4, 0, 7, 0, 0, 8, 6, 0, 4 });

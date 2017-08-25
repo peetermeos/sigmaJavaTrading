@@ -24,16 +24,17 @@ public class VolConnector extends TwsConnector {
 	//private List<Contract> hedgeInst;
 
 	/**
-	 * 
+	 * Constructs VolConnector instance that does the TWS connection
+	 * and information retrieval.
 	 */
 	public VolConnector() {
 		super("TWS Volatility Optimizer Connector");
 	}
 	
 	/**
-	 * 
+	 * Creates contract for the full instrument option chain
 	 */
-	public void CreateContract() {
+	public void createContract() {
 		logger.log("Creating contract");
 		
 		inst = new Contract();
@@ -45,38 +46,48 @@ public class VolConnector extends TwsConnector {
 	}
 	
 	/**
-	 * 
+	 * Retrieves portfolio info
 	 */
-	public void RetrievePortfolio() {
+	public void retrievePortfolio() {
 		logger.log("Retrieving active portfolio");
-		
+		if (tws.isConnected()) {
+			tws.reqPositions();
+		}
 	}
 	
 	/**
-	 * 
+	 * Requests option chain contract details
 	 */
-	public void GetOptionChain() {
+	public void getOptionChain() {
 		logger.log("Retrieving option chain");
+		if (inst != null && tws.isConnected()) {
+			tws.reqContractDetails(nextOrderID, inst);
+		}
 	}
 	
 	/**
 	 * 
 	 */
-	public void CalculateGreeks() {
+	public void calculateGreeks() {
 		logger.log("Calculating greeks");
 	}
 	
-	/**
-	 * 
-	 */
-	public void OptimisePortoflio() {
-		logger.log("Optimising portfolio");
-	}
 	
 	/**
 	 * 
 	 */
-	public void CreateOrders() {
+	public void createOrders() {
 		logger.log("Creating orders");
 	}
+	
+	@Override
+    public void position(String account, Contract contract, double pos,
+            double avgCost) {
+        logger.log("Position. " + account+
+        		" - Symbol: " + contract.symbol() +
+        		", SecType: " + contract.secType() +
+        		", Currency: " + contract.currency() +
+        		", Position: " + pos + 
+        		", Avg cost: " + avgCost);
+    }
 }
