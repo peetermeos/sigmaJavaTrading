@@ -21,6 +21,11 @@ import com.ib.client.TagValue;
 import sigma.utils.Logger;
 import sigma.utils.LogLevel;
 
+/**
+ * 
+ * @author Peeter Meos
+ *
+ */
 public class TwsTrader implements EWrapper {
 	
 	// TWS internals
@@ -50,6 +55,11 @@ public class TwsTrader implements EWrapper {
     private Logger logger;
     private Thread msgThread;
     
+    /**
+     * 
+     * @author Peeter Meos
+     *
+     */
     class Task implements Runnable {
         public void run(){
           while (!Thread.currentThread().isInterrupted()){
@@ -58,6 +68,11 @@ public class TwsTrader implements EWrapper {
         }
     }
 	
+    /**
+     * Constructor for TwsTrader object. 
+     * Simply creates the instance and starts
+     * the logger.
+     */
 	public TwsTrader() {
 		logger = new Logger(LogLevel.INFO);
 		logger.log("Sigma News Trader init.");
@@ -65,6 +80,11 @@ public class TwsTrader implements EWrapper {
 			tws = new EClientSocket(this, m_signal);
 	}
 	
+	/**
+	 * Connection method for TwsTrader
+	 * @param host host name for TWS or IB Gateway
+	 * @param port port for TWS or IB Gateway
+	 */
 	public void twsConnect(String host, int port) {
 	    tws.eConnect(host, port, 55);
 	    
@@ -84,6 +104,10 @@ public class TwsTrader implements EWrapper {
 	    msgThread.start();	
 	}
 	
+	/**
+	 * Connection method for TwsTrader.
+	 * Connects to localhost port 4001
+	 */
 	public void twsConnect() {
 		twsConnect("127.0.0.1", 4001);
 	}
@@ -279,8 +303,7 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void tickOptionComputation(int tickerId, int field, double impliedVol, double delta, double optPrice,
 			double pvDividend, double gamma, double vega, double theta, double undPrice) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Tick option computation");		
 	}
 
 	@Override
@@ -297,7 +320,7 @@ public class TwsTrader implements EWrapper {
 	public void tickEFP(int tickerId, int tickType, double basisPoints, String formattedBasisPoints,
 			double impliedFuture, int holdDays, String futureLastTradeDate, double dividendImpact,
 			double dividendsToLastTradeDate) {
-		// TODO Auto-generated method stub
+		logger.verbose("Tick EFP");
 		
 	}
 
@@ -331,7 +354,7 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue,
 			double averageCost, double unrealizedPNL, double realizedPNL, String accountName) {
-		// TODO Auto-generated method stub
+		logger.verbose("Update portfolio");
 		
 	}
 
@@ -379,20 +402,18 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void updateMktDepth(int tickerId, int position, int operation, int side, double price, int size) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Update market depth");		
 	}
 
 	@Override
 	public void updateMktDepthL2(int tickerId, int position, String marketMaker, int operation, int side, double price,
 			int size) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Update market depth L2");		
 	}
 
 	@Override
 	public void updateNewsBulletin(int msgId, int msgType, String message, String origExchange) {
-		// TODO Auto-generated method stub
+		logger.verbose("Update news bulletin");
 		
 	}
 
@@ -403,15 +424,13 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void receiveFA(int faDataType, String xml) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Receive FA");
 	}
 
 	@Override
 	public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume,
 			int count, double WAP, boolean hasGaps) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Historical data received.");		
 	}
 
 	@Override
@@ -435,7 +454,7 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume,
 			double wap, int count) {
-		// TODO Auto-generated method stub
+		logger.verbose("Realtime bar received.");
 		
 	}
 
@@ -451,8 +470,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void deltaNeutralValidation(int reqId, DeltaNeutralContract underComp) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Delta neutral validation");		
 	}
 
 	@Override
@@ -462,8 +480,7 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void marketDataType(int reqId, int marketDataType) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Market data type received");		
 	}
 
 	@Override
@@ -501,32 +518,27 @@ public class TwsTrader implements EWrapper {
 
 	@Override
 	public void verifyCompleted(boolean isSuccessful, String errorText) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Verify completed msg received");
 	}
 
 	@Override
 	public void verifyAndAuthMessageAPI(String apiData, String xyzChallange) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Verify and auth message API");	
 	}
 
 	@Override
 	public void verifyAndAuthCompleted(boolean isSuccessful, String errorText) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Verify and auth completed");		
 	}
 
 	@Override
 	public void displayGroupList(int reqId, String groups) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Display group list");		
 	}
 
 	@Override
 	public void displayGroupUpdated(int reqId, String contractInfo) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Display group updated");	
 	}
 
 	@Override
@@ -558,7 +570,7 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void positionMulti(int reqId, String account, String modelCode, Contract contract, double pos,
 			double avgCost) {
-		// TODO Auto-generated method stub
+		logger.verbose("Position multi");
 		
 	}
 
@@ -570,8 +582,7 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void accountUpdateMulti(int reqId, String account, String modelCode, String key, String value,
 			String currency) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Account update multi");		
 	}
 
 	@Override
@@ -582,14 +593,12 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void securityDefinitionOptionalParameter(int reqId, String exchange, int underlyingConId,
 			String tradingClass, String multiplier, Set<String> expirations, Set<Double> strikes) {
-		// TODO Auto-generated method stub
-		
+		logger.log("Security defition optional parameter");		
 	}
 
 	@Override
 	public void securityDefinitionOptionalParameterEnd(int reqId) {
-		// TODO Auto-generated method stub
-		
+		logger.verbose("Securoty defition optional parameter end.");		
 	}
 
 }
