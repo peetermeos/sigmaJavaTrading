@@ -111,7 +111,7 @@ public class TwsConnector implements EWrapper {
 	 * 
 	 */
 	public void twsDisconnect() {
-		logger.log("TWS connector exiting.");
+		logger.log(myName + " exiting.");
 					
 		m_reader.interrupt();
 		msgThread.interrupt();
