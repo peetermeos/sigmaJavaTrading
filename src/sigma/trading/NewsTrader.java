@@ -21,7 +21,7 @@ public class NewsTrader {
 		
 		trader.twsConnect();
 		trader.createContracts();
-		trader.createOrders();
+		//	trader.createOrders();
 		
 		trader.doTrading();
 		trader.twsDisconnect(); 

@@ -31,6 +31,8 @@ public class TwsTrader extends TwsConnector {
     private double delta = 0;
     private double trailAmt = 0;
     private double q = 0;
+    
+    private boolean simulated = true;
       
     /**
      * Constructor for TwsTrader object. 
@@ -39,6 +41,17 @@ public class TwsTrader extends TwsConnector {
      */
 	public TwsTrader() {
 		super("Sigma News Trader");
+		logger.log("Simualted mode :" + simulated);
+	}
+	
+	/**
+	 * 
+	 * @param m_sim
+	 */
+	public TwsTrader(boolean m_simulated) {
+		super("Sigma News Trader");
+		simulated = m_simulated;
+		logger.log("Simulated mode :" + simulated);
 	}
 	
 	/**
@@ -161,10 +174,13 @@ public class TwsTrader extends TwsConnector {
 		
 		logger.log("Placing orders");
 		oID = nextOrderID;
-		tws.placeOrder(oID, inst, longStop);
-		tws.placeOrder(oID + 1, inst, shortStop);
-		tws.placeOrder(oID + 2, inst, longTrail);
-		tws.placeOrder(oID + 3, inst, shortTrail);
+		if (!simulated) {
+			tws.placeOrder(oID, inst, longStop);
+			tws.placeOrder(oID + 1, inst, shortStop);
+			tws.placeOrder(oID + 2, inst, longTrail);
+			tws.placeOrder(oID + 3, inst, shortTrail);			
+		}
+
 		
 		currentSpot = spotPrice;
 	}
@@ -182,10 +198,13 @@ public class TwsTrader extends TwsConnector {
 			shortTrail.trailStopPrice(spotPrice);	
 			
 			logger.log("Placing orders");
-			tws.placeOrder(oID, inst, longStop);
-			tws.placeOrder(oID + 1, inst, shortStop);
-			tws.placeOrder(oID + 2, inst, longTrail);
-			tws.placeOrder(oID + 3, inst, shortTrail);
+			if (!simulated ) {
+				tws.placeOrder(oID, inst, longStop);
+				tws.placeOrder(oID + 1, inst, shortStop);
+				tws.placeOrder(oID + 2, inst, longTrail);
+				tws.placeOrder(oID + 3, inst, shortTrail);	
+			}
+			
 			
 			currentSpot = spotPrice;
 		}

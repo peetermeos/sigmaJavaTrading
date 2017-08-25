@@ -13,7 +13,7 @@ import com.ib.client.Types.SecType;
 //import cern.colt.matrix.tdouble.DoubleMatrix2D;
 
 /**
- * 
+ * TWS Connector for volatility surface mapping
  * @author Peeter Meos
  *
  */
