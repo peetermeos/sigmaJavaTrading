@@ -29,6 +29,7 @@ public class TwsTrader implements EWrapper {
     private EClientSocket tws;
     
     private int nextOrderID = 0;
+    private int oID = 0;
     private String genericTickList = null;
     
     // Contract structure
@@ -39,7 +40,8 @@ public class TwsTrader implements EWrapper {
     private Order longTrail;
     private Order shortTrail;
     
-    private double spotPrice = 0;
+    private double spotPrice = -1;
+    private double currentSpot = -1;
     private double delta = 0;
     private double trailAmt = 0;
     private double q = 0;
@@ -87,9 +89,6 @@ public class TwsTrader implements EWrapper {
 	}
 	
 	public void doTrading() {
-		logger.log("Requesting market data");
-		Vector<TagValue> mktDataOptions = new Vector<TagValue>();
-		tws.reqMktData(1, inst, genericTickList, false, mktDataOptions);
 		
 		logger.log("Entering main trading loop");
 		try {
@@ -137,6 +136,10 @@ public class TwsTrader implements EWrapper {
 		// Requesting contract details
 		logger.log("Requesting contract details");
 		tws.reqContractDetails(nextOrderID, inst);
+		
+		logger.log("Requesting market data");
+		Vector<TagValue> mktDataOptions = new Vector<TagValue>();
+		tws.reqMktData(1, inst, genericTickList, false, mktDataOptions);
 	}
 	
 	public void createOrders() {
@@ -148,27 +151,31 @@ public class TwsTrader implements EWrapper {
 		shortTrail = new Order();
 		
 		// Types
+		logger.log("Setting order types");
 		longStop.orderType(OrderType.STP_LMT);
 		shortStop.orderType(OrderType.STP_LMT);
 		longTrail.orderType(OrderType.TRAIL_LIMIT);
 		shortTrail.orderType(OrderType.TRAIL_LIMIT);
 		
 		// Actions
+		logger.log("Setting order actions");
 		longStop.action("BUY");
 		shortStop.action("SELL");
 		longTrail.action("SELL");
 		shortTrail.action("BUY");
 		
 		// Quantities
+		logger.log("Setting order quantities");
 		q = 1;
 		longStop.totalQuantity(q);
 		shortStop.totalQuantity(q);
 		longTrail.totalQuantity(q);
-		longTrail.totalQuantity(q);
+		shortTrail.totalQuantity(q);
 		
 		// Prices
 		// First wait to have spot price
-		while (spotPrice == 0) {
+		logger.log("Waiting for spot price");
+		while (spotPrice < 0) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -179,47 +186,61 @@ public class TwsTrader implements EWrapper {
 		delta = 0.05;
 		trailAmt = 0.1;
 		
+		logger.log("Setting order limits");
 		longStop.lmtPrice(spotPrice + delta);
+		longStop.auxPrice(spotPrice + delta);
 		longStop.transmit(false);
-		longStop.orderId(1001);
+		longStop.orderId(nextOrderID);
+		longStop.outsideRth(true);
 		
-		shortStop.lmtPrice(spotPrice + delta);
+		shortStop.lmtPrice(spotPrice - delta);
+		shortStop.auxPrice(spotPrice - delta);
 		shortStop.transmit(false);
-		shortStop.orderId(1002);
+		shortStop.orderId(nextOrderID + 1);
+		shortStop.outsideRth(true);
 		
 		longTrail.trailStopPrice(spotPrice);
 		longTrail.auxPrice(trailAmt);
 		longTrail.parentId(longStop.orderId());
-		longTrail.transmit(false);
+		longTrail.transmit(true);
+		longTrail.outsideRth(true);
 		
 		shortTrail.trailStopPrice(spotPrice);
 		shortTrail.auxPrice(trailAmt);
 		shortTrail.parentId(shortStop.orderId());
-		shortTrail.transmit(false);
+		shortTrail.transmit(true);
+		shortTrail.outsideRth(true);
 		
 		// OCO groupings and attached orders
 		longStop.ocaGroup("NT");
 		shortStop.ocaGroup("NT");
 		
 		logger.log("Placing orders");
-		//tws.placeOrder(nextOrderID, inst, longStop);
-		//tws.placeOrder(nextOrderID, inst, shortStop);
-		//tws.placeOrder(nextOrderID, inst, longTrail);
-		//tws.placeOrder(nextOrderID, inst, shortTrail;
+		oID = nextOrderID;
+		tws.placeOrder(oID, inst, longStop);
+		tws.placeOrder(oID + 1, inst, shortStop);
+		tws.placeOrder(oID + 2, inst, longTrail);
+		tws.placeOrder(oID + 3, inst, shortTrail);
+		
+		currentSpot = spotPrice;
 	}
 	
 	public void adjustOrders(double spotPrice) {
-		logger.log("Adjusting orders");
-		longStop.lmtPrice(spotPrice + delta);
-		shortStop.lmtPrice(spotPrice - delta);
-		longTrail.trailStopPrice(spotPrice);
-		shortTrail.trailStopPrice(spotPrice);
-		
-		logger.log("Placing orders");
-		//tws.placeOrder(nextOrderID, inst, longStop);
-		//tws.placeOrder(nextOrderID, inst, shortStop);
-		//tws.placeOrder(nextOrderID, inst, longTrail);
-		//tws.placeOrder(nextOrderID, inst, shortTrail;
+		if (spotPrice != currentSpot) {
+			logger.log("Adjusting orders");
+			longStop.lmtPrice(spotPrice + delta);
+			shortStop.lmtPrice(spotPrice - delta);
+			longTrail.trailStopPrice(spotPrice);
+			shortTrail.trailStopPrice(spotPrice);	
+			
+			logger.log("Placing orders");
+			tws.placeOrder(oID, inst, longStop);
+			tws.placeOrder(oID + 1, inst, shortStop);
+			tws.placeOrder(oID + 2, inst, longTrail);
+			tws.placeOrder(oID + 3, inst, shortTrail);
+			
+			currentSpot = spotPrice;
+		}
 	}
 	
 	public void cancelOrders() {
@@ -239,7 +260,7 @@ public class TwsTrader implements EWrapper {
 			break;
 		case 4:
 			tckType = "last";
-			spotPrice = price;
+			this.spotPrice = price;
 			break;
 		default:
 			tckType = null;
@@ -401,7 +422,7 @@ public class TwsTrader implements EWrapper {
 	@Override
 	public void scannerData(int reqId, int rank, ContractDetails contractDetails, String distance, String benchmark,
 			String projection, String legsStr) {
-		// TODO Auto-generated method stub
+		logger.verbose("Scanner data");
 		
 	}
 
