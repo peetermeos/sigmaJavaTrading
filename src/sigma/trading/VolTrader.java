@@ -19,7 +19,14 @@ public class VolTrader {
 	}
 	
 	/**
-	 * 
+	 * Portfolio optimisation method for the class.
+	 * Formulates the portfolio as a BIP model with
+	 * options selected to the portfolio as binary
+	 * variables.
+	 * <p>
+	 * Either minimises portfolio gamma or maximises
+	 * theta while keeping the other within set
+	 * bounds.
 	 */
 	public void optimisePortoflio() {
 		tws.logger.log("Optimising portfolio");	
