@@ -43,11 +43,11 @@ public class TwsTrader extends TwsConnector {
     /**
      * Constructor for TwsTrader object. 
      * Simply creates the instance and starts
-     * the logger.
+     * the logger. The default for safety is to start in
+     * simulated mode.
      */
 	public TwsTrader() {
-		super("Sigma News Trader");
-		logger.log("Simualted mode :" + simulated);
+		this(true);
 	}
 	
 	/**
