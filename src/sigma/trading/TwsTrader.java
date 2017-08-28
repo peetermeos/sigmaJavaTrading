@@ -51,6 +51,9 @@ public class TwsTrader extends TwsConnector {
 	}
 	
 	/**
+	 * Constructor for TwsTrader object.
+	 * Sets the initial safety parameter to either
+	 * allow or prevent live trading.
 	 * 
 	 * @param m_sim
 	 */
@@ -58,6 +61,22 @@ public class TwsTrader extends TwsConnector {
 		super("Sigma News Trader");
 		simulated = m_simulated;
 		logger.log("Simulated mode :" + simulated);
+	}
+	
+	/**
+	 * Method disarms the trader and turns off live
+	 * trading mode.
+	 */
+	public void safetyOn( ) {
+		this.simulated = true;
+	}
+	
+	/**
+	 * Method allows Trader object to create active orders and
+	 * in fact do live trading.
+	 */
+	public void safetyOff() {
+		this.simulated = false;
 	}
 	
 	/**
