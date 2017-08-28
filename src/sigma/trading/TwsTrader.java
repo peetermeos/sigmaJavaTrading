@@ -9,8 +9,14 @@ import com.ib.client.OrderType;
 import com.ib.client.TagValue;
 
 /**
+ * The News Trader object.
+ * The strategy is to have stop loss orders on both sides of the 
+ * market to wait for a substantial jump or drop on previously
+ * known news event. After the jump use trail stop to get the 
+ * profit.
  * 
  * @author Peeter Meos
+ * @version 0.3
  *
  */
 public class TwsTrader extends TwsConnector {
@@ -19,7 +25,7 @@ public class TwsTrader extends TwsConnector {
     private String genericTickList = null;
     
     // Contract structure
-    private Contract inst;
+    private Contract inst = null;
    
     private Order longStop;
     private Order shortStop;
@@ -37,11 +43,11 @@ public class TwsTrader extends TwsConnector {
     /**
      * Constructor for TwsTrader object. 
      * Simply creates the instance and starts
-     * the logger.
+     * the logger. The default for safety is to start in
+     * simulated mode.
      */
 	public TwsTrader() {
-		super("Sigma News Trader");
-		logger.log("Simualted mode :" + simulated);
+		this(true);
 	}
 	
 	/**
@@ -55,9 +61,15 @@ public class TwsTrader extends TwsConnector {
 	}
 	
 	/**
-	 * 
+	 * This method implements the main trading loop for the 
+	 * news trading object.
 	 */
 	public void doTrading() {
+		if (!tws.isConnected()) {
+			logger.error("doTrading(): Not connected to TWS.");
+			return;
+		}
+		
 		logger.log("Entering main trading loop");
 		try {
 			tws.reqCurrentTime();
@@ -75,7 +87,8 @@ public class TwsTrader extends TwsConnector {
 	}
 	 	
 	/**
-	 * 
+	 * Method creates contracts for the instrument to be traded
+	 * Currently assumes that we trade futures (such as WTI Crude)
 	 */
 	public void createContracts() {
 		logger.log("Creating contract structure");
@@ -97,9 +110,17 @@ public class TwsTrader extends TwsConnector {
 	}
 	
 	/**
-	 * 
+	 *  This method creates orders for the instrument and 
+	 *  transmits them to the market. The method should naturally
+	 *  be run after createContracts() is called.
 	 */
 	public void createOrders() {
+		// Exit if the instrument has not been created
+		if (inst == null) {
+			logger.error("createOrders(): Instrument to be traded is not created.");
+			return;
+		}
+		
 		logger.log("Creating order structure");
 		
 		longStop = new Order();
@@ -143,6 +164,7 @@ public class TwsTrader extends TwsConnector {
 		delta = 0.05;
 		trailAmt = 0.1;
 		
+		// Long order
 		logger.log("Setting order limits");
 		longStop.lmtPrice(spotPrice + delta);
 		longStop.auxPrice(spotPrice + delta);
@@ -150,18 +172,21 @@ public class TwsTrader extends TwsConnector {
 		longStop.orderId(nextOrderID);
 		longStop.outsideRth(true);
 		
+		// Short order
 		shortStop.lmtPrice(spotPrice - delta);
 		shortStop.auxPrice(spotPrice - delta);
 		shortStop.transmit(false);
 		shortStop.orderId(nextOrderID + 1);
 		shortStop.outsideRth(true);
 		
+		// Long profit taker
 		longTrail.trailStopPrice(spotPrice);
 		longTrail.auxPrice(trailAmt);
 		longTrail.parentId(longStop.orderId());
 		longTrail.transmit(true);
 		longTrail.outsideRth(true);
 		
+		// Short profit taker
 		shortTrail.trailStopPrice(spotPrice);
 		shortTrail.auxPrice(trailAmt);
 		shortTrail.parentId(shortStop.orderId());
@@ -169,25 +194,28 @@ public class TwsTrader extends TwsConnector {
 		shortTrail.outsideRth(true);
 		
 		// OCO groupings and attached orders
-		longStop.ocaGroup("NT");
-		shortStop.ocaGroup("NT");
+		longStop.ocaGroup("NT" + inst.symbol());
+		shortStop.ocaGroup("NT" + inst.symbol());
 		
-		logger.log("Placing orders");
-		oID = nextOrderID;
-		if (!simulated) {
+		if (tws.isConnected() && !simulated) {
+			logger.log("Placing orders");
+			oID = nextOrderID;
+
 			tws.placeOrder(oID, inst, longStop);
 			tws.placeOrder(oID + 1, inst, shortStop);
 			tws.placeOrder(oID + 2, inst, longTrail);
 			tws.placeOrder(oID + 3, inst, shortTrail);			
 		}
 
-		
+		// Save the current price
 		currentSpot = spotPrice;
 	}
 	
 	/**
+	 * This method adjust the orders to reflect the current
+	 * spot price for the instrument.
 	 * 
-	 * @param spotPrice
+	 * @param spotPrice double - spot price for the instrument
 	 */
 	public void adjustOrders(double spotPrice) {
 		if (spotPrice != currentSpot) {
@@ -211,7 +239,7 @@ public class TwsTrader extends TwsConnector {
 	}
 	
 	/**
-	 * 
+	 * Cancels all the active orders for the instrument
 	 */
 	public void cancelOrders() {
 		// tws.cancelOrder(id);
