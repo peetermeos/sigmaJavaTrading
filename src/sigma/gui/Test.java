@@ -16,11 +16,12 @@ public class Test {
 	
 	public void prepareGUI() {
 	    mainFrame = new JFrame("Java SWING Examples");
-	    mainFrame.setSize(400,400);
+	    mainFrame.setSize(800,400);
 	    mainFrame.setLayout(new GridLayout(3, 1));
 
-	    headerLabel = new JLabel("",JLabel.CENTER );
-	    statusLabel = new JLabel("",JLabel.CENTER);        
+	    headerLabel = new JLabel("Header",JLabel.CENTER );
+	    
+	    statusLabel = new JLabel("Status",JLabel.CENTER);        
 	    statusLabel.setSize(350,100);
 	      
 	    mainFrame.addWindowListener(new WindowAdapter() {
