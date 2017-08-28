@@ -42,7 +42,7 @@ public class VolTrader {
 		trader.tws.getOptionChain();
 		
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(25000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

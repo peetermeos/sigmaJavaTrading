@@ -1,16 +1,10 @@
 package sigma.trading;
 
-//import java.util.List;
 
 import com.ib.client.Contract;
+import com.ib.client.ContractDetails;
 import com.ib.client.Types.SecType;
-//import com.joptimizer.optimizers.BIPLokbaTableMethod;
-//import com.joptimizer.optimizers.BIPOptimizationRequest;
 
-//import cern.colt.matrix.tdouble.DoubleFactory1D;
-//import cern.colt.matrix.tdouble.DoubleFactory2D;
-//import cern.colt.matrix.tdouble.DoubleMatrix1D;
-//import cern.colt.matrix.tdouble.DoubleMatrix2D;
 
 /**
  * TWS Connector for volatility surface mapping
@@ -59,6 +53,10 @@ public class VolConnector extends TwsConnector {
 	 * Requests option chain contract details
 	 */
 	public void getOptionChain() {
+		// TODO option chain parameters need to be added.
+		// Such as - range of strikes and expiries
+		// or reqSecDefOptParams
+		
 		logger.log("Retrieving option chain");
 		if (inst != null && tws.isConnected()) {
 			tws.reqContractDetails(nextOrderID, inst);
@@ -90,4 +88,10 @@ public class VolConnector extends TwsConnector {
         		", Position: " + pos + 
         		", Avg cost: " + avgCost);
     }
+	
+	@Override
+	public void contractDetails(int reqId, ContractDetails contractDetails) {
+		//logger.log("Contract details req: " + reqId + " " + contractDetails.toString());
+		logger.log("Local symbol: " + contractDetails.contract().localSymbol());
+	}
 }
