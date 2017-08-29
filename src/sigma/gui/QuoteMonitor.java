@@ -6,7 +6,12 @@ package sigma.gui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import com.ib.client.Contract;
+import com.ib.client.TagValue;
+
 import java.util.List;
+import java.util.Vector;
 import java.util.ArrayList;
 
 import sigma.trading.TwsConnector;
@@ -130,10 +135,35 @@ public class QuoteMonitor extends TwsConnector{
 	 * Requests live market data for the contracts
 	 */
 	public void getData() {
+		Contract c = null;
+		String genericTickList = null;
+		Vector<TagValue> mktDataOptions = new Vector<TagValue>();
+		
 		if (tws.isConnected()) {
-			// create contract
-			// request contract id
-			// request live data
+			for(Instrument i: portfolio) {
+				// create contract
+				c = new Contract();
+				c.symbol(i.getSymbol());
+				c.exchange(i.getExchange());
+				
+				switch (i.getSecType()) {
+				case "FUT":
+					c.secType("FUT");
+					c.lastTradeDateOrContractMonth(i.getExpiry());
+					break;
+				case "STK":
+					c.secType("STK");
+					break;
+				default:
+					break;
+				}
+				
+				// request contract id
+				tws.reqContractDetails(nextOrderID, c);
+				// request live data
+				tws.reqMktData(portfolio.indexOf(i) + 1, c, genericTickList, false, mktDataOptions);
+				
+			}
 		}
 	}
 	
@@ -169,7 +199,6 @@ public class QuoteMonitor extends TwsConnector{
 	public static void main(String[] args) {
 		QuoteMonitor app = new QuoteMonitor();
 		app.showGUI();
-		app.twsDisconnect();
 	}
 
 }

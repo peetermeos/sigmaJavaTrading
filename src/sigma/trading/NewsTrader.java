@@ -18,11 +18,11 @@ public class NewsTrader {
 	public static void main(String[] args) {
 		TwsTrader trader;
 		
-		trader = new TwsTrader();
+		trader = new TwsTrader(false);
 		
 		trader.twsConnect();
 		trader.createContracts();
-		//	trader.createOrders();
+		trader.createOrders();
 		
 		trader.doTrading();
 		trader.twsDisconnect(); 
