@@ -1,9 +1,19 @@
 package sigma.gui;
 
-public class OrderManager {
+import sigma.trading.TwsConnector;
 
+public class OrderManager extends TwsConnector{
+
+	public OrderManager() {
+		super("Sigma Order Manager");
+	}
+	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		OrderManager app;
+		
+		app = new OrderManager();
+		app.twsConnect();
+		app.twsDisconnect();
 
 	}
 

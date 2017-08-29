@@ -7,52 +7,49 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import sigma.trading.TwsConnector;
+
 /**
  * 
  * @author Peeter Meos
  * @version 0.1
  *
  */
-public class QuoteMonitor {
+public class QuoteMonitor extends TwsConnector{
 	private JFrame mainFrame;
 	private JLabel headerLabel;
 	private JLabel statusLabel;
 	private JPanel controlPanel;
 	private JTable quoteTable;
+	private JTextArea logWindow;
 	
-	String[] columnNames = {"First Name",
-            "Last Name",
-            "Sport",
-            "# of Years",
-            "Vegetarian"};
+	String[] columnNames = {"Contract",
+            "Bid", "Ask", "Last",
+            "Previous close"};
 	
 	Object[][] data = {
-		    {"Kathy", "Smith",
-		     "Snowboarding", new Integer(5), new Boolean(false)},
-		    {"John", "Doe",
-		     "Rowing", new Integer(3), new Boolean(true)},
-		    {"Sue", "Black",
-		     "Knitting", new Integer(2), new Boolean(false)},
-		    {"Jane", "White",
-		     "Speed reading", new Integer(20), new Boolean(true)},
-		    {"Joe", "Brown",
-		     "Pool", new Integer(10), new Boolean(false)}
+		    {"CL", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
+		    {"RB", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
+		    {"SVXY", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
+		    {"JDST", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
+		    {"VIX Index", new Integer(5), new Integer(5), new Integer(5), new Integer(5)}
 		};
 	
 	/**
-	 * 
+	 * The standard constructor. Just prepares the visuals for the GUI.
 	 */
 	public QuoteMonitor() {
+		super("Quote Monitor");
 		prepareGUI();
 	}
 	
 	/**
-	 * 
+	 * Creates visuals and controls for the GUI.
 	 */
 	public void prepareGUI() {
 	    mainFrame = new JFrame("Java SWING Examples");
 	    mainFrame.setSize(800,400);
-	    mainFrame.setLayout(new GridLayout(4, 1));
+	    mainFrame.setLayout(new GridLayout(5, 1));
 
 	    headerLabel = new JLabel("Header",JLabel.CENTER );
 	    
@@ -60,10 +57,20 @@ public class QuoteMonitor {
 	    statusLabel.setSize(350,100);
 	    
 	    quoteTable = new JTable(data, columnNames);
+	    
+	    logWindow = new JTextArea(5, 20);
 	      
 	    mainFrame.addWindowListener(new WindowAdapter() {
+	    	
+	       /**
+	        * Window close event handler.
+	        * Closes twsConnection and exits.
+	        * 
+	        * @param windowEvent
+	        */
 	       public void windowClosing(WindowEvent windowEvent){
-	          System.exit(0);
+	    	   twsDisconnect();
+	           System.exit(0);
 	       }        
 	    });    
 	      
@@ -73,12 +80,13 @@ public class QuoteMonitor {
 	    mainFrame.add(headerLabel);
 	    mainFrame.add(controlPanel);
 	    mainFrame.add(quoteTable);
+	    mainFrame.add(logWindow);
 	    mainFrame.add(statusLabel);
 	    mainFrame.setVisible(true);		
 	}
 	
 	/**
-	 * 
+	 * Displays the GUI and activates the controls.
 	 */
 	public void showGUI() {
 	    headerLabel.setText("Control in action: Button"); 
@@ -103,6 +111,7 @@ public class QuoteMonitor {
 	}
 	
 	/**
+	 * The simple button click listener method.
 	 * 
 	 * @author Peeter Meos
 	 * @version 0.1
@@ -115,8 +124,10 @@ public class QuoteMonitor {
 	         
 	         if( command.equals( "Connect" ))  {
 	            statusLabel.setText("Connect Button clicked.");
+	    		twsConnect();
 	         } else if( command.equals( "Disconnect" ) )  {
 	            statusLabel.setText("Disconnect Button clicked."); 
+	    		twsDisconnect();
 	         } else {
 	            statusLabel.setText("Cancel Button clicked.");
 	         } 
@@ -130,6 +141,7 @@ public class QuoteMonitor {
 	public static void main(String[] args) {
 		QuoteMonitor app = new QuoteMonitor();
 		app.showGUI();
+		app.twsDisconnect();
 	}
 
 }
