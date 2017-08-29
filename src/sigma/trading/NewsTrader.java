@@ -3,7 +3,8 @@ package sigma.trading;
 
 /**
  * Main news trader code, primarily just a wrapper for 
- * news trader object
+ * news trader object.
+ * 
  * @author Peeter Meos
  * @version 1.0
  *
