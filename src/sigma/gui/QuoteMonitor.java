@@ -6,8 +6,12 @@ package sigma.gui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.List;
+import java.util.ArrayList;
 
 import sigma.trading.TwsConnector;
+import sigma.trading.Instrument;
+
 
 /**
  * 
@@ -23,23 +27,35 @@ public class QuoteMonitor extends TwsConnector{
 	private JTable quoteTable;
 	private JTextArea logWindow;
 	
+	private List<Instrument> portfolio;
+	
 	String[] columnNames = {"Contract",
             "Bid", "Ask", "Last",
             "Previous close"};
 	
 	Object[][] data = {
-		    {"CL", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
-		    {"RB", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
-		    {"SVXY", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
-		    {"JDST", new Integer(5), new Integer(5), new Integer(5), new Integer(5)},
-		    {"VIX Index", new Integer(5), new Integer(5), new Integer(5), new Integer(5)}
+		    {"CL", new Double(0), new Double(0), new Double(0), new Double(0)},
+		    {"RB", new Double(0), new Double(0), new Double(0), new Double(0)},
+		    {"SVXY", new Double(0), new Double(0), new Double(0), new Double(0)},
+		    {"JDST", new Double(0), new Double(0), new Double(0), new Double(0)},
+		    {"JNUG", new Double(0), new Double(0), new Double(0), new Double(0)}
 		};
+	
 	
 	/**
 	 * The standard constructor. Just prepares the visuals for the GUI.
 	 */
 	public QuoteMonitor() {
 		super("Quote Monitor");
+		
+		// Initialise the portfolio
+		portfolio = new ArrayList<Instrument>();
+		portfolio.add(new Instrument("CL", "FUT", "NYMEX", "201710"));
+		portfolio.add(new Instrument("RB", "FUT", "NYMEX", "201710"));
+		portfolio.add(new Instrument("SVXY", "STK", "SMART", ""));
+		portfolio.add(new Instrument("JDST", "STK", "SMART", ""));
+		portfolio.add(new Instrument("JNUG", "STK", "SMART", ""));
+		
 		prepareGUI();
 	}
 	
@@ -47,7 +63,7 @@ public class QuoteMonitor extends TwsConnector{
 	 * Creates visuals and controls for the GUI.
 	 */
 	public void prepareGUI() {
-	    mainFrame = new JFrame("Java SWING Examples");
+	    mainFrame = new JFrame("Sigma Quote Monitor");
 	    mainFrame.setSize(800,400);
 	    mainFrame.setLayout(new GridLayout(5, 1));
 
@@ -93,11 +109,11 @@ public class QuoteMonitor extends TwsConnector{
 
 	    JButton okButton = new JButton("Connect");
 	    JButton submitButton = new JButton("Disconnect");
-	    JButton cancelButton = new JButton("Cancel");
+	    JButton cancelButton = new JButton("Request Data");
 
 	    okButton.setActionCommand("Connect");
 	    submitButton.setActionCommand("Disconnect");
-	    cancelButton.setActionCommand("Cancel");
+	    cancelButton.setActionCommand("Request Data");
 
 	    okButton.addActionListener(new ButtonClickListener()); 
 	    submitButton.addActionListener(new ButtonClickListener()); 
@@ -108,6 +124,17 @@ public class QuoteMonitor extends TwsConnector{
 	    controlPanel.add(cancelButton);       
 
 	    mainFrame.setVisible(true); 		
+	}
+	
+	/**
+	 * Requests live market data for the contracts
+	 */
+	public void getData() {
+		if (tws.isConnected()) {
+			// create contract
+			// request contract id
+			// request live data
+		}
 	}
 	
 	/**
@@ -125,11 +152,12 @@ public class QuoteMonitor extends TwsConnector{
 	         if( command.equals( "Connect" ))  {
 	            statusLabel.setText("Connect Button clicked.");
 	    		twsConnect();
+	    		getData();
 	         } else if( command.equals( "Disconnect" ) )  {
 	            statusLabel.setText("Disconnect Button clicked."); 
 	    		twsDisconnect();
 	         } else {
-	            statusLabel.setText("Cancel Button clicked.");
+	            statusLabel.setText("Request Data clicked.");
 	         } 
 		}		
 	}

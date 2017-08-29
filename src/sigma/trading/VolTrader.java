@@ -1,21 +1,32 @@
 package sigma.trading;
 
 import sigma.optimiser.MaximiseTheta;
+import org.jquantlib.instruments.Option;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * Portfolio optimiser that tries to minimise option portfolio gamma
+ * and maximise theta. Downloads current positions and options chain 
+ * via TWS API and then using Quantlib calculates option Greeks,
+ * sets up optimisation as a BIP and solves it. 
  * 
  * @author Peeter Meos
+ * @version 0.1
  *
  */
 public class VolTrader {
 	VolConnector tws;
 	MaximiseTheta opt;
+	List<Option> options;
 	
 	/**
 	 * 
 	 */
 	public VolTrader() {
 		tws = new VolConnector();
+		options = new ArrayList<Option>();
 	}
 	
 	/**
@@ -49,14 +60,14 @@ public class VolTrader {
 		trader.tws.getOptionChain();
 		
 		try {
-			Thread.sleep(25000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
 		trader.tws.twsDisconnect();
 		
-		// TODO Calculate option greeks
+		// TODO Calculate option Greeks
 		
 		// TODO Run optimiser
 		trader.optimisePortoflio();

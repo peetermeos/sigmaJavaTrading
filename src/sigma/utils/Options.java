@@ -164,9 +164,9 @@ public class Options implements Runnable {
 
         // Binomial method
         method = "Binomial Jarrow-Rudd";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<JarrowRudd>(JarrowRudd.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<JarrowRudd>(JarrowRudd.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<JarrowRudd>(JarrowRudd.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<JarrowRudd>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<JarrowRudd>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<JarrowRudd>(bsmProcess, timeSteps));
         double bNPV = Double.NaN;
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
@@ -174,54 +174,54 @@ public class Options implements Runnable {
         System.out.printf(fmt, method, europeanOption.NPV(), bNPV, americanOption.NPV() );
 
         method = "Binomial Cox-Ross-Rubinstein";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<CoxRossRubinstein>(CoxRossRubinstein.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<CoxRossRubinstein>(CoxRossRubinstein.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<CoxRossRubinstein>(CoxRossRubinstein.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<CoxRossRubinstein>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<CoxRossRubinstein>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<CoxRossRubinstein>(bsmProcess, timeSteps));
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
         }
         System.out.printf(fmt, method, europeanOption.NPV(), bNPV, americanOption.NPV() );
 
         method = "Additive EquiProbabilities";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<AdditiveEQPBinomialTree>(AdditiveEQPBinomialTree.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<AdditiveEQPBinomialTree>(AdditiveEQPBinomialTree.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<AdditiveEQPBinomialTree>(AdditiveEQPBinomialTree.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<AdditiveEQPBinomialTree>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<AdditiveEQPBinomialTree>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<AdditiveEQPBinomialTree>(bsmProcess, timeSteps));
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
         }
         System.out.printf(fmt, method, europeanOption.NPV(), bNPV, americanOption.NPV() );
 
         method = "Binomial Trigeorgis";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<Trigeorgis>(Trigeorgis.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<Trigeorgis>(Trigeorgis.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<Trigeorgis>(Trigeorgis.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<Trigeorgis>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<Trigeorgis>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<Trigeorgis>(bsmProcess, timeSteps));
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
         }
         System.out.printf(fmt, method, europeanOption.NPV(), bNPV, americanOption.NPV() );
 
         method = "Binomial Tian";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<Tian>(Tian.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<Tian>(Tian.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<Tian>(Tian.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<Tian>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<Tian>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<Tian>(bsmProcess, timeSteps));
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
         }
         System.out.printf(fmt, method, europeanOption.NPV(), bNPV, americanOption.NPV() );
 
         method = "Binomial Leisen-Reimer";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<LeisenReimer>(LeisenReimer.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<LeisenReimer>(LeisenReimer.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<LeisenReimer>(LeisenReimer.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<LeisenReimer>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<LeisenReimer>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<LeisenReimer>(bsmProcess, timeSteps));
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
         }
         System.out.printf(fmt, method, europeanOption.NPV(), bNPV, americanOption.NPV() );
 
         method = "Binomial Joshi";
-        //europeanOption.setPricingEngine(new BinomialVanillaEngine<Joshi4>(Joshi4.class, bsmProcess, timeSteps));
-        //bermudanOption.setPricingEngine(new BinomialVanillaEngine<Joshi4>(Joshi4.class, bsmProcess, timeSteps));
-        //americanOption.setPricingEngine(new BinomialVanillaEngine<Joshi4>(Joshi4.class, bsmProcess, timeSteps));
+        europeanOption.setPricingEngine(new BinomialVanillaEngine<Joshi4>(bsmProcess, timeSteps));
+        bermudanOption.setPricingEngine(new BinomialVanillaEngine<Joshi4>(bsmProcess, timeSteps));
+        americanOption.setPricingEngine(new BinomialVanillaEngine<Joshi4>(bsmProcess, timeSteps));
         if (System.getProperty("EXPERIMENTAL") != null) {
             bNPV = bermudanOption.NPV();
         }
@@ -272,7 +272,7 @@ public class Options implements Runnable {
         //                false, false, false,
         //                nSamples, 0.02, maxSamples, mcSeed));
         //        System.out.printf(fmt, method, europeanOption.NPV(), Double.NaN, Double.NaN);
-        //
+        
 
         method = "Monte Carlo (Longstaff Schwartz)";
         System.out.printf(fmttbd, method, Double.NaN, Double.NaN, Double.NaN );
