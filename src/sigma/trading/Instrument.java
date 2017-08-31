@@ -1,9 +1,12 @@
 package sigma.trading;
 
+import sigma.utils.OptSide;
+import com.ib.client.Contract;
+
 /**
  * 
  * @author Peeter Meos
- * @version 0.1
+ * @version 0.2
  *
  */
 public class Instrument {
@@ -11,6 +14,10 @@ public class Instrument {
 	private String secType;
 	private String exchange;
 	private String expiry;
+	private Double strike;
+	private OptSide side;
+	
+	private Contract inst;
 	
 	private double bid;
 	private double ask;
@@ -19,13 +26,37 @@ public class Instrument {
 	private long secID;
 	
 	/**
-	 * Constructor method for Instrument class
+	 * Constructor method for Instrument class for stocks and futures
 	 */
 	public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry) {
 		this.symbol = m_symbol;
 		this.secType = m_secType;
 		this.exchange = m_exchange;
 		this.expiry = m_expiry;
+		this.setStrike(0.0);
+		this.setSide(OptSide.NONE);
+		
+		this.setInst(new Contract());
+		
+		this.bid = 0;
+		this.ask = 0;
+		this.last = 0;
+		this.prvClose = 0;
+		
+	}
+	
+	/**
+	 * Constructor method for Instrument class for options
+	 */
+	public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
+		this.symbol = m_symbol;
+		this.secType = m_secType;
+		this.exchange = m_exchange;
+		this.expiry = m_expiry;
+		this.setStrike(m_strike);
+		this.setSide(m_side);
+		
+		this.setInst(new Contract());
 		
 		this.bid = 0;
 		this.ask = 0;
@@ -158,5 +189,47 @@ public class Instrument {
 	 */
 	public void setExpiry(String expiry) {
 		this.expiry = expiry;
+	}
+
+	/**
+	 * @return the side
+	 */
+	public OptSide getSide() {
+		return side;
+	}
+
+	/**
+	 * @param side the side to set
+	 */
+	public void setSide(OptSide side) {
+		this.side = side;
+	}
+
+	/**
+	 * @return the strike
+	 */
+	public Double getStrike() {
+		return strike;
+	}
+
+	/**
+	 * @param strike the strike to set
+	 */
+	public void setStrike(Double strike) {
+		this.strike = strike;
+	}
+
+	/**
+	 * @return the inst
+	 */
+	public Contract getInst() {
+		return inst;
+	}
+
+	/**
+	 * @param inst the inst to set
+	 */
+	public void setInst(Contract inst) {
+		this.inst = inst;
 	}
 }

@@ -1,10 +1,15 @@
 package sigma.trading;
 
 import sigma.optimiser.MaximiseTheta;
+import sigma.utils.Helper;
+import sigma.utils.OptSide;
+
 import org.jquantlib.instruments.Option;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Portfolio optimiser that tries to minimise option portfolio gamma
@@ -20,13 +25,37 @@ public class VolTrader {
 	VolConnector tws;
 	MaximiseTheta opt;
 	List<Option> options;
+	private Set<String> expirySet;
+	private Set<Double> strikeSet;
+	private List<Instrument> hedgeInst;
 	
 	/**
-	 * 
+	 * Initialises the volatility optimiser.
+	 * Creates all the required objects and the solution 
+	 * space for optimal portfolio (ie. expiries x strikes)
 	 */
 	public VolTrader() {
 		tws = new VolConnector();
 		options = new ArrayList<Option>();
+		expirySet = new HashSet<String>();
+		strikeSet = new HashSet<Double>();
+		hedgeInst = new ArrayList<Instrument>();
+		
+		
+		// Describe list of valid expiries and strikes
+		expirySet.add("201712");
+		expirySet.add("201803");
+		
+		strikeSet.add(45.0);	
+		strikeSet.add(55.0);
+		
+		// Create instruments
+		for (String i: expirySet) {
+			for (Double j: strikeSet) {
+				hedgeInst.add(new Instrument("CL", "FOP", "NYMEX", i, j, OptSide.CALL));
+				hedgeInst.add(new Instrument("CL", "FOP", "NYMEX", i, j, OptSide.PUT));
+			}
+		}
 	}
 	
 	/**
@@ -38,8 +67,14 @@ public class VolTrader {
 	 * Either minimises portfolio gamma or maximises
 	 * theta while keeping the other within set
 	 * bounds.
+	 * 
+	 * @param maxGamma maximal Gamma allowed for the portfolio
+	 *        units - currency
+	 *        
+	 * @param minTheta minimal Theta allowed for the portfolio
+	 *        units - currency  
 	 */
-	public void optimisePortoflio() {
+	public void optimisePortoflio(double maxGamma, double minTheta) {
 		tws.logger.log("Optimising portfolio");	
 		opt = new MaximiseTheta();
 	}
@@ -47,7 +82,7 @@ public class VolTrader {
 	
 	/**
 	 * 
-	 * @param args
+	 * @param args Command line parameters for the trader code.
 	 */
 	public static void main(String[] args) {
 		VolTrader trader;
@@ -56,21 +91,19 @@ public class VolTrader {
 		trader = new VolTrader();
 		trader.tws.twsConnect();
 		trader.tws.retrievePortfolio();
-		trader.tws.createContract();
-		trader.tws.getOptionChain();
+		//trader.tws.createContract(trader.hedgeInst);
+		trader.hedgeInst.forEach(item->trader.tws.createContract(item));
 		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		trader.tws.getOptionChain(trader.hedgeInst);
+		
+		Helper.sleep(5000);
 		
 		trader.tws.twsDisconnect();
 		
 		// TODO Calculate option Greeks
 		
 		// TODO Run optimiser
-		trader.optimisePortoflio();
+		trader.optimisePortoflio(500, 0);
 		
 		// Return the results
 		

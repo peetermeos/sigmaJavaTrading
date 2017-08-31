@@ -14,6 +14,7 @@ import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
 
+import sigma.utils.Helper;
 import sigma.utils.LogLevel;
 import sigma.utils.Logger;
 
@@ -84,11 +85,8 @@ public class TwsConnector implements EWrapper {
 	    tws.eConnect(host, port, 55);
 	    
 	    while (! tws.isConnected())
-			try {
-				Thread.sleep(500);
-			} catch (Exception e) {
-				logger.error(e);
-			}
+			Helper.sleep(500);
+	    
 	    logger.log("Connected");
 
 	    m_reader = new EReader(tws, m_signal);

@@ -1,3 +1,9 @@
+/**
+ * Package for handling TWS connectivity and 
+ * trading algorithms.
+ * 
+ * @author Peeter Meos
+ */
 package sigma.trading;
 
 import java.io.IOException;
@@ -7,6 +13,8 @@ import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderType;
 import com.ib.client.TagValue;
+
+import sigma.utils.TraderState;
 
 /**
  * The News Trader object.
@@ -21,6 +29,8 @@ import com.ib.client.TagValue;
  */
 public class TwsTrader extends TwsConnector {
 
+	private TraderState state;
+	
     private int oID = 0;
     private String genericTickList = null;
     
@@ -35,6 +45,7 @@ public class TwsTrader extends TwsConnector {
     private double spotPrice = -1;
     private double currentSpot = -1;
     private double delta = 0;
+    private double adjLimit = 0.02;
     private double trailAmt = 0;
     private double q = 0;
     
@@ -61,6 +72,7 @@ public class TwsTrader extends TwsConnector {
 		super("Sigma News Trader");
 		simulated = m_simulated;
 		logger.log("Simulated mode :" + simulated);
+		this.state = TraderState.WAIT;
 	}
 	
 	/**
@@ -223,7 +235,9 @@ public class TwsTrader extends TwsConnector {
 			tws.placeOrder(oID, inst, longStop);
 			tws.placeOrder(oID + 1, inst, shortStop);
 			tws.placeOrder(oID + 2, inst, longTrail);
-			tws.placeOrder(oID + 3, inst, shortTrail);			
+			tws.placeOrder(oID + 3, inst, shortTrail);	
+			
+			this.state = TraderState.LIVE;
 		}
 
 		// Save the current price
@@ -237,7 +251,7 @@ public class TwsTrader extends TwsConnector {
 	 * @param spotPrice double - spot price for the instrument
 	 */
 	public void adjustOrders(double spotPrice) {
-		if (spotPrice != currentSpot) {
+		if (Math.abs(spotPrice - this.currentSpot) > this.adjLimit) {
 			logger.log("Adjusting orders");
 			longStop.lmtPrice(spotPrice + delta);
 			shortStop.lmtPrice(spotPrice - delta);
@@ -251,9 +265,8 @@ public class TwsTrader extends TwsConnector {
 				tws.placeOrder(oID + 2, inst, longTrail);
 				tws.placeOrder(oID + 3, inst, shortTrail);	
 			}
-			
-			
-			currentSpot = spotPrice;
+						
+			this.currentSpot = spotPrice;
 		}
 	}
 	
@@ -261,9 +274,19 @@ public class TwsTrader extends TwsConnector {
 	 * Cancels all the active orders for the instrument
 	 */
 	public void cancelOrders() {
-		// tws.cancelOrder(id);
+		tws.cancelOrder(oID);
+		tws.cancelOrder(oID + 1);
+		tws.cancelOrder(oID + 2);
+		tws.cancelOrder(oID + 3);
+		
+		// TODO Before this, we need to be sure, that in fact the orders were cancelled.
+		this.state = TraderState.WAIT;
 	}
 	
+	/**
+	 * Overriden tickPrice method that updates current spot price of the instrument and
+	 * if needed, adjusts the orders.
+	 */
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
 		String tckType = null;
@@ -286,6 +309,10 @@ public class TwsTrader extends TwsConnector {
 			logger.log("Price ticker " + tickerId + " field " + tckType + " price " + price);	
 		}
 			
+		// Adjust orders if price has moved too much
+		if (this.currentSpot > 0 && this.state == TraderState.LIVE) {
+			adjustOrders(price);
+		}
 	}
 
 }

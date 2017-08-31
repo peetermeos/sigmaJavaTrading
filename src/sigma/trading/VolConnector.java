@@ -1,11 +1,14 @@
 package sigma.trading;
 
 
+import java.util.List;
 import java.util.Set;
 
 import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
 import com.ib.client.Types.SecType;
+
+import sigma.utils.Helper;
 
 
 /**
@@ -18,7 +21,6 @@ public class VolConnector extends TwsConnector {
 	private Contract inst;
 	private int underConID = -1;
 	
-	//private List<Contract> hedgeInst;
 
 	/**
 	 * Constructs VolConnector instance that does the TWS connection
@@ -31,7 +33,7 @@ public class VolConnector extends TwsConnector {
 	/**
 	 * Creates contract for the full instrument option chain
 	 */
-	public void createContract() {
+	public void createContract(Instrument hedgeInst) {
 		logger.log("Creating contract");
 		
 		inst = new Contract();
@@ -56,26 +58,26 @@ public class VolConnector extends TwsConnector {
 	/**
 	 * Requests option chain contract details
 	 */
-	public void getOptionChain() {
+	public void getOptionChain(List<Instrument> hedgeInst) {
 		// TODO option chain parameters need to be added.
 		// Such as - range of strikes and expiries
 		// or reqSecDefOptParams
 		
 		logger.log("Requesting contract details for underlying");
 		if (inst != null && tws.isConnected()) {
+			
 			tws.reqContractDetails(nextOrderID, inst);
 			// wait until we have contract ID for underlying
 			logger.log("Waiting for underlying contract ID");
 			while (underConID < 0) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					logger.error(e);
-				}
+				Helper.sleep(100);
 			}
+			
+			//tws.reqMktData(tickerId, contract, genericTickList, snapshot, mktDataOptions);
+			
 			logger.log("Contract ID received, proceeding.");
 			logger.log("Retrieving option chain");
-			tws.reqSecDefOptParams(nextOrderID, inst.symbol(), inst.exchange(), inst.secType().toString(), underConID);
+			//tws.reqSecDefOptParams(nextOrderID, inst.symbol(), inst.exchange(), inst.secType().toString(), underConID);
 		}
 	}
 	

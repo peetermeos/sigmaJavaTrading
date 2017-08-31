@@ -15,6 +15,7 @@ import java.util.Vector;
 import java.util.ArrayList;
 
 import sigma.trading.TwsConnector;
+import sigma.utils.OptSide;
 import sigma.trading.Instrument;
 
 
@@ -31,6 +32,7 @@ public class QuoteMonitor extends TwsConnector{
 	private JPanel controlPanel;
 	private JTable quoteTable;
 	private JTextArea logWindow;
+	private JScrollPane scrollPane;
 	
 	private List<Instrument> portfolio;
 	
@@ -69,15 +71,18 @@ public class QuoteMonitor extends TwsConnector{
 	 */
 	public void prepareGUI() {
 	    mainFrame = new JFrame("Sigma Quote Monitor");
-	    mainFrame.setSize(800,400);
-	    mainFrame.setLayout(new GridLayout(5, 1));
+	    mainFrame.setSize(800, 400);
+	    mainFrame.setLayout(new GridLayout(5, 1, 5, 5));
 
 	    headerLabel = new JLabel("Header",JLabel.CENTER );
 	    
 	    statusLabel = new JLabel("Status",JLabel.CENTER);        
-	    statusLabel.setSize(350,100);
+	    statusLabel.setSize(350, 100);
+	    
 	    
 	    quoteTable = new JTable(data, columnNames);
+	    scrollPane = new JScrollPane(quoteTable);
+	    quoteTable.setFillsViewportHeight(true);
 	    
 	    logWindow = new JTextArea(5, 20);
 	      
@@ -100,7 +105,7 @@ public class QuoteMonitor extends TwsConnector{
 
 	    mainFrame.add(headerLabel);
 	    mainFrame.add(controlPanel);
-	    mainFrame.add(quoteTable);
+	    mainFrame.add(scrollPane);
 	    mainFrame.add(logWindow);
 	    mainFrame.add(statusLabel);
 	    mainFrame.setVisible(true);		
