@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import com.ib.client.Contract;
+import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderType;
 import com.ib.client.TagValue;
@@ -314,5 +315,31 @@ public class TwsTrader extends TwsConnector {
 			adjustOrders(price);
 		}
 	}
+	
+	/**
+	 * Overriden to change trader status, when order executes
+	 */
+	@Override
+    public void execDetails(int reqId, Contract contract, Execution execution) {
+		
+		// If the order was regular stop limit (entry)
+		if ((execution.orderId() == oID) || (execution.orderId() == oID + 1)) {
+			// Stop has fired
+			logger.log("Entry order " + reqId + " for " + contract.symbol() + " has executed");
+			this.state = TraderState.EXEC;
+			// Here we should run a check that order on the other side got cancelled and only the trail 
+			// is active
+
+		}
+		
+		// If the order was trail stop (exit)
+		if ((execution.orderId() == oID + 2) || (execution.orderId() == oID + 3)) {
+			// Stop has fired
+			logger.log("Exit order " + reqId + " for " + contract.symbol() + " has executed");
+			this.state = TraderState.WAIT;
+			// Here we should check that we have no active orders
+		}
+		
+    }
 
 }
