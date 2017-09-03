@@ -69,9 +69,9 @@ public class TwsTrader extends TwsConnector {
 	 * 
 	 * @param m_sim
 	 */
-	public TwsTrader(boolean m_simulated) {
+	public TwsTrader(boolean simulated) {
 		super("Sigma News Trader");
-		simulated = m_simulated;
+		this.simulated = simulated;
 		logger.log("Simulated mode :" + simulated);
 		this.state = TraderState.WAIT;
 	}
@@ -190,6 +190,7 @@ public class TwsTrader extends TwsConnector {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				logger.error(e);
+				Thread.currentThread().interrupt();
 			}
 		}
 		
