@@ -12,12 +12,14 @@ import com.ib.client.Contract;
 public class Instrument {
 	private String symbol;
 	private String secType;
+	private String ulType;
 	private String exchange;
 	private String expiry;
 	private Double strike;
 	private OptSide side;
 	
 	private Contract inst;
+	private Contract ul;
 	
 	private double bid;
 	private double ask;
@@ -31,12 +33,14 @@ public class Instrument {
 	public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry) {
 		this.symbol = m_symbol;
 		this.secType = m_secType;
+		this.ulType = "";
 		this.exchange = m_exchange;
 		this.expiry = m_expiry;
 		this.setStrike(0.0);
 		this.setSide(OptSide.NONE);
 		
 		this.setInst(new Contract());
+		this.setUl(null);
 		
 		this.bid = 0;
 		this.ask = 0;
@@ -55,6 +59,20 @@ public class Instrument {
 		this.expiry = m_expiry;
 		this.setStrike(m_strike);
 		this.setSide(m_side);
+
+		switch(this.secType) {
+		case "FOP":
+			this.ulType = "FUT";
+			this.setUl(new Contract());
+			break;
+		case "OPT":
+			this.ulType = "STK";
+			this.setUl(new Contract());
+			break;
+		default:
+			this.ulType = "";
+			this.setUl(null);
+		}
 		
 		this.setInst(new Contract());
 		
@@ -65,6 +83,7 @@ public class Instrument {
 		
 	}
 	
+
 	/**
 	 * @return the prvClose
 	 */
@@ -231,5 +250,19 @@ public class Instrument {
 	 */
 	public void setInst(Contract inst) {
 		this.inst = inst;
+	}
+
+	/**
+	 * @return the ul
+	 */
+	public Contract getUl() {
+		return ul;
+	}
+
+	/**
+	 * @param ul the ul to set
+	 */
+	public void setUl(Contract ul) {
+		this.ul = ul;
 	}
 }

@@ -91,7 +91,8 @@ public class VolTrader {
 		trader = new VolTrader();
 		trader.tws.twsConnect();
 		trader.tws.retrievePortfolio();
-		//trader.tws.createContract(trader.hedgeInst);
+		
+		// Request contract details for underlying contracts
 		trader.hedgeInst.forEach(item->trader.tws.createContract(item));
 		
 		trader.tws.getOptionChain(trader.hedgeInst);

@@ -41,6 +41,7 @@ public class VolConnector extends TwsConnector {
 		inst.symbol("CL");
 		inst.exchange("NYMEX");
 		inst.currency("USD");
+
 		//inst.lastTradeDateOrContractMonth("201710");
 		inst.secType(SecType.FUT);
 	}
