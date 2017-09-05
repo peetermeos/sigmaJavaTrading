@@ -7,22 +7,22 @@ public class Logger {
 	
 	LogLevel logLevel = LogLevel.INFO;
 
-	public Logger(LogLevel p_logLevel) {
-		logLevel = p_logLevel;
+	public Logger(LogLevel logLevel) {
+		this.logLevel = logLevel;
 	}
 	
 	public Logger() {
 	}
 	
-	public void log(String m_str) {
-		this.log(LogLevel.INFO, m_str);
+	public void log(String str) {
+		this.log(LogLevel.INFO, str);
 	}
 	
-	public void log(LogLevel m_level, String m_str) {
+	public void log(LogLevel level, String str) {
 		Date dtg = new Date();
 		
-		if (m_level.ordinal() <= logLevel.ordinal()) {
-			System.out.println(dtg.toString() + ": " + m_level.toString() + ":" + m_str);
+		if (level.ordinal() <= logLevel.ordinal()) {
+			System.out.println(dtg.toString() + ": " + level.toString() + ":" + str);
 		}
 	}
 	
@@ -39,7 +39,7 @@ public class Logger {
 	}
 	
 	public void error(Exception e) {		
-		//System.out.println(e.getStackTrace().toString());
+		// System.out.println(e.getStackTrace().toString());
 		e.printStackTrace();
 	}
 

@@ -36,10 +36,10 @@ public class VolTrader {
 	 */
 	public VolTrader() {
 		tws = new VolConnector();
-		options = new ArrayList<Option>();
-		expirySet = new HashSet<String>();
-		strikeSet = new HashSet<Double>();
-		hedgeInst = new ArrayList<Instrument>();
+		options = new ArrayList<>();
+		expirySet = new HashSet<>();
+		strikeSet = new HashSet<>();
+		hedgeInst = new ArrayList<>();
 		
 		
 		// Describe list of valid expiries and strikes

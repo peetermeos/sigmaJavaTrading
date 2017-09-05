@@ -12,6 +12,7 @@ public enum LogLevel {
 	/**
 	 * Standard toSting() method for the LogLevel enum.
 	 */
+	@Override
 	public String toString() {
 		switch(this) {
 		case ERROR:

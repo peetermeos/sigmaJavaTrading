@@ -10,6 +10,7 @@ package sigma.utils;
 public enum OptSide {
 	CALL, PUT, NONE;
 	
+	@Override
 	public String toString() {
 		switch (this) {
 		case CALL:

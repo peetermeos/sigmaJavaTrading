@@ -17,6 +17,7 @@ public enum TraderState {
 	/**
 	 * @return String value of enum
 	 */
+	@Override
 	public String toString() {
 		switch(this) {
 		case WAIT:
