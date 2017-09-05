@@ -256,12 +256,20 @@ public class TwsTrader extends TwsConnector {
 		if (Math.abs(spotPrice - this.currentSpot) > this.adjLimit) {
 			logger.log("Adjusting orders");
 			longStop.lmtPrice(spotPrice + delta);
+			longStop.auxPrice(spotPrice + delta);
 			shortStop.lmtPrice(spotPrice - delta);
+			shortStop.auxPrice(spotPrice - delta);
+			
 			longTrail.trailStopPrice(spotPrice);
 			shortTrail.trailStopPrice(spotPrice);	
 			
 			logger.log("Placing orders");
 			if (!simulated ) {
+				longStop.transmit(true);
+				shortStop.transmit(true);
+				longTrail.transmit(true);
+				shortTrail.transmit(true);
+				
 				tws.placeOrder(oID, inst, longStop);
 				tws.placeOrder(oID + 1, inst, shortStop);
 				tws.placeOrder(oID + 2, inst, longTrail);

@@ -25,12 +25,11 @@ public class NewsTrader {
 		trader.twsConnect();
 		trader.createContracts();
 		Helper.sleep(2000);
-		//trader.createOrders();
+		trader.createOrders();
 		
-		//trader.doTrading();
+		trader.doTrading();
 		trader.tws.cancelMktData(1);
 
-		Helper.sleep(5000);
 		trader.twsDisconnect(); 
 	}
 
