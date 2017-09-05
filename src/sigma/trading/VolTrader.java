@@ -28,6 +28,7 @@ public class VolTrader {
 	private Set<String> expirySet;
 	private Set<Double> strikeSet;
 	private List<Instrument> hedgeInst;
+	private List<Instrument> futCurve;
 	
 	/**
 	 * Initialises the volatility optimiser.
@@ -39,7 +40,8 @@ public class VolTrader {
 		options = new ArrayList<Option>();
 		expirySet = new HashSet<String>();
 		strikeSet = new HashSet<Double>();
-		hedgeInst = new ArrayList<Instrument>();
+		hedgeInst = new ArrayList<>();
+		futCurve = new ArrayList<>();
 		
 		
 		// Describe list of valid expiries and strikes
@@ -48,6 +50,10 @@ public class VolTrader {
 		
 		strikeSet.add(45.0);	
 		strikeSet.add(55.0);
+		
+		// Futures
+		futCurve.add(new Instrument("CL", "FUT", "NYMEX", "201712"));
+		futCurve.add(new Instrument("CL", "FUT", "NYMEX", "201803"));
 		
 		// Create instruments
 		for (String i: expirySet) {
@@ -91,8 +97,10 @@ public class VolTrader {
 		trader = new VolTrader();
 		trader.tws.twsConnect();
 		trader.tws.retrievePortfolio();
-		//trader.tws.createContract(trader.hedgeInst);
+		
+		// Request contract details for underlying contracts
 		trader.hedgeInst.forEach(item->trader.tws.createContract(item));
+		trader.futCurve.forEach(item->trader.tws.getFutureCurve(item));
 		
 		trader.tws.getOptionChain(trader.hedgeInst);
 		

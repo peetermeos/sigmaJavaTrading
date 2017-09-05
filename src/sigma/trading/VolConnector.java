@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
+import com.ib.client.TagValue;
 import com.ib.client.Types.SecType;
 
 import sigma.utils.Helper;
@@ -41,6 +42,7 @@ public class VolConnector extends TwsConnector {
 		inst.symbol("CL");
 		inst.exchange("NYMEX");
 		inst.currency("USD");
+
 		//inst.lastTradeDateOrContractMonth("201710");
 		inst.secType(SecType.FUT);
 	}
@@ -54,6 +56,21 @@ public class VolConnector extends TwsConnector {
 			tws.reqPositions();
 		}
 	}
+	
+	/**
+	 * Request futures forward curve.
+	 */
+	public void getFutureCurve(Instrument inst) {
+		
+		String genericTickList = "";
+		boolean snapshot = true;
+		List<TagValue> mktDataOptions = null;
+		
+		// TODO ticker ID needs to be automatic.
+		int tickerId = 12;
+		
+		tws.reqMktData(tickerId, inst.getInst(), genericTickList, snapshot, mktDataOptions);
+	};
 	
 	/**
 	 * Requests option chain contract details
