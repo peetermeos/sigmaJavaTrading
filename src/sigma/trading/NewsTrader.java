@@ -1,6 +1,8 @@
 
 package sigma.trading;
 
+import sigma.utils.Helper;
+
 /**
  * Main news trader code, primarily just a wrapper for 
  * news trader object.
@@ -22,9 +24,13 @@ public class NewsTrader {
 		
 		trader.twsConnect();
 		trader.createContracts();
-		trader.createOrders();
+		Helper.sleep(2000);
+		//trader.createOrders();
 		
-		trader.doTrading();
+		//trader.doTrading();
+		trader.tws.cancelMktData(1);
+
+		Helper.sleep(5000);
 		trader.twsDisconnect(); 
 	}
 

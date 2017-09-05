@@ -45,7 +45,7 @@ public class NewsTrader {
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Initialise the contents of the frame.
 	 */
 	private void initialize() {
 		frmSigmaNewsTrader = new JFrame();

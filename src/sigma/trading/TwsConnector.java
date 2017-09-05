@@ -112,26 +112,21 @@ public class TwsConnector implements EWrapper {
 	 */
 	public void twsDisconnect() {
 		logger.log(myName + " exiting.");
-
-		logger.log("Closing socket");
-		tws.eDisconnect();
 		
+
 		logger.log("Stopping message processessor");
 		msgThread.interrupt();
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			logger.error(e);
-		}
+		Helper.sleep(100);
 		msgThread = null;
 		
 		logger.log("Stopping reader");
 		m_reader.interrupt();
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			logger.error(e);
-		}
+		Helper.sleep(100);
+
+		logger.log("Closing socket");
+		Helper.sleep(100);
+		tws.eDisconnect();
+		
 		m_reader = null;
 	}
 	
