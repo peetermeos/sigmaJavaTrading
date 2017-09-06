@@ -25,6 +25,7 @@ import sigma.utils.Logger;
  *
  */
 public class TwsConnector implements EWrapper {
+
 	// TWS internals
 	protected EJavaSignal m_signal = new EJavaSignal();
 	protected EReader m_reader;

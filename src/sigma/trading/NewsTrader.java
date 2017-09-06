@@ -23,7 +23,7 @@ public class NewsTrader {
 		trader = new TwsTrader(false);
 		
 		trader.twsConnect();
-		trader.createContracts();
+		trader.createContracts("CL", "NYMEX", "FUT", "1000", "201710");
 		Helper.sleep(2000);
 		trader.createOrders();
 		

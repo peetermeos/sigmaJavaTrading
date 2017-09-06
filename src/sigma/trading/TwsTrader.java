@@ -9,6 +9,8 @@ package sigma.trading;
 import java.io.IOException;
 import java.util.Vector;
 
+import java.util.Date;
+
 import com.ib.client.Contract;
 import com.ib.client.Execution;
 import com.ib.client.Order;
@@ -25,7 +27,7 @@ import sigma.utils.TraderState;
  * profit.
  * 
  * @author Peeter Meos
- * @version 0.3
+ * @version 0.4
  *
  */
 public class TwsTrader extends TwsConnector {
@@ -46,9 +48,12 @@ public class TwsTrader extends TwsConnector {
     private double spotPrice = -1;
     private double currentSpot = -1;
     private double delta = 0;
-    private double adjLimit = 0.02;
+    private double adjLimit = 0.04;
     private double trailAmt = 0;
     private double q = 0;
+    
+    private Date dtg = null;
+    private long timeWindow = 2000; // msec after which is OK to update orders
     
     private boolean simulated = true;
       
@@ -110,6 +115,7 @@ public class TwsTrader extends TwsConnector {
 			while (System.in.available() == 0) {
 				Thread.sleep(100);
 				// Here check open orders and adjust them if needed
+				// Here check key presses to arm/disarm/quit trader
 			}
 			
 		} catch (InterruptedException | IOException e) {
@@ -123,14 +129,27 @@ public class TwsTrader extends TwsConnector {
 	 * Currently assumes that we trade futures (such as WTI Crude)
 	 */
 	public void createContracts() {
+		createContracts("CL", "NYMEX", "FUT", "1000", "201710");
+	}
+	
+	/**
+	 * Contract creation with specified symbols
+	 * 
+	 * @param symbol Instrument symbol (CL, ES, NQ, etc)
+	 * @param exchange Exchange where traded ("NYMEX", "SMART")
+	 * @param type ("FUT", "STK")
+	 * @param mult Multiplier ("1000")
+	 * @param expDate Last trading date or month ("201710")
+	 */
+	public void createContracts(String symbol, String exchange, String type, String mult, String expDate) {
 		logger.log("Creating contract structure");
 		
 		inst = new Contract();
-		inst.exchange("NYMEX");
-		inst.symbol("CL");
-		inst.secType("FUT");
-		inst.multiplier("1000");
-		inst.lastTradeDateOrContractMonth("201710");
+		inst.exchange(exchange);
+		inst.symbol(symbol);
+		inst.secType(type);
+		inst.multiplier(mult);
+		inst.lastTradeDateOrContractMonth(expDate);
 		
 		// Requesting contract details
 		logger.log("Requesting contract details");
@@ -138,7 +157,7 @@ public class TwsTrader extends TwsConnector {
 		
 		logger.log("Requesting market data");
 		Vector<TagValue> mktDataOptions = new Vector<TagValue>();
-		tws.reqMktData(1, inst, genericTickList, false, mktDataOptions);
+		tws.reqMktData(1, inst, genericTickList, false, mktDataOptions);		
 	}
 	
 	/**
@@ -253,7 +272,12 @@ public class TwsTrader extends TwsConnector {
 	 * @param spotPrice double - spot price for the instrument
 	 */
 	public void adjustOrders(double spotPrice) {
-		if (Math.abs(spotPrice - this.currentSpot) > this.adjLimit) {
+		// TODO Here we also need to add time difference (5 sec) 
+		if (Math.abs(spotPrice - this.currentSpot) > this.adjLimit &&
+			dtg.getTime() + timeWindow < new Date().getTime() ) {
+			
+			dtg = new Date();
+			
 			logger.log("Adjusting orders");
 			longStop.lmtPrice(spotPrice + delta);
 			longStop.auxPrice(spotPrice + delta);
@@ -265,6 +289,7 @@ public class TwsTrader extends TwsConnector {
 			
 			logger.log("Placing orders");
 			if (!simulated ) {
+				dtg = new Date();
 				longStop.transmit(true);
 				shortStop.transmit(true);
 				longTrail.transmit(true);
@@ -300,6 +325,9 @@ public class TwsTrader extends TwsConnector {
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
 		String tckType = null;
+		
+		// Currently assumes only one instrument and ticker id.
+		// If we trade many, then many ticker IDs are needed.
 		
 		switch(field) {
 		case 1: 
