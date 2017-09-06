@@ -33,7 +33,7 @@ public class Instrument {
 	public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry) {
 		this.symbol = m_symbol;
 		this.secType = m_secType;
-		this.ulType = "";
+		this.setUlType("");
 		this.exchange = m_exchange;
 		this.expiry = m_expiry;
 		this.setStrike(0.0);
@@ -45,8 +45,7 @@ public class Instrument {
 		this.bid = 0;
 		this.ask = 0;
 		this.last = 0;
-		this.prvClose = 0;
-		
+		this.prvClose = 0;	
 	}
 	
 	/**
@@ -62,15 +61,15 @@ public class Instrument {
 
 		switch(this.secType) {
 		case "FOP":
-			this.ulType = "FUT";
+			this.setUlType("FUT");
 			this.setUl(new Contract());
 			break;
 		case "OPT":
-			this.ulType = "STK";
+			this.setUlType("STK");
 			this.setUl(new Contract());
 			break;
 		default:
-			this.ulType = "";
+			this.setUlType("");
 			this.setUl(null);
 		}
 		
@@ -239,30 +238,44 @@ public class Instrument {
 	}
 
 	/**
-	 * @return the inst
+	 * @return the instrument
 	 */
 	public Contract getInst() {
 		return inst;
 	}
 
 	/**
-	 * @param inst the inst to set
+	 * @param inst the instrument to set
 	 */
 	public void setInst(Contract inst) {
 		this.inst = inst;
 	}
 
 	/**
-	 * @return the ul
+	 * @return the underlying
 	 */
 	public Contract getUl() {
 		return ul;
 	}
 
 	/**
-	 * @param ul the ul to set
+	 * @param ul the underlying to set
 	 */
 	public void setUl(Contract ul) {
 		this.ul = ul;
+	}
+
+	/**
+	 * @return the ulType
+	 */
+	public String getUlType() {
+		return ulType;
+	}
+
+	/**
+	 * @param ulType the ulType to set
+	 */
+	public void setUlType(String ulType) {
+		this.ulType = ulType;
 	}
 }

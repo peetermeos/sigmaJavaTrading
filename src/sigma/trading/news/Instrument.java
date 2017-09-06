@@ -6,12 +6,14 @@ package sigma.trading.news;
 import com.ib.client.Contract;
 import com.ib.client.Order;
 
+import sigma.utils.OptSide;
+
 /**
  * @author Peeter Meos
  * @version 0.1
  *
  */
-public class Instrument {
+public class Instrument extends sigma.trading.Instrument {
     // Contract structure
 	private Contract inst = null;
 	
@@ -30,13 +32,20 @@ public class Instrument {
     private double q = 0;
     
     /** 
-     * Standard constructor for the news trader instrument class
+     * Standard constructors for the news trader instrument class
      */
-    public Instrument() {
+    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry) {
+    	super(m_symbol, m_secType, m_exchange, m_expiry);
     	
+    	inst = new Contract();
+    	inst.symbol(m_symbol);
+    	inst.secType(m_secType);
+    	inst.exchange(m_exchange);
+    	inst.lastTradeDateOrContractMonth(m_expiry);
     }
     
-    public Instrument(int ID) {
+    public Instrument(int ID, String m_symbol, String m_secType, String m_exchange, String m_expiry) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry);
     	this.ID = ID;
     	
     	inst = new Contract();
@@ -46,6 +55,23 @@ public class Instrument {
     	longTrail = new Order();
     	shortTrail = new Order();
     } 
+    
+    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
+    	super(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
+    	
+    	inst = new Contract();
+    	inst.symbol(m_symbol);
+    	inst.secType(m_secType);
+    	inst.exchange(m_exchange);
+    	inst.lastTradeDateOrContractMonth(m_expiry);
+    	inst.strike(m_strike);
+    	inst.right(m_side.toString());
+    }
+    
+    public Instrument(int ID, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
+    	this.ID = ID;
+    }
     
 	/**
 	 * @return the delta

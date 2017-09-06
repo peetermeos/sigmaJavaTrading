@@ -57,10 +57,10 @@ public class Trader {
 		trader.connect();
 		
 		// Instrument add CL
-		trader.instList.add(new Instrument());
+		trader.instList.add(new Instrument(1, "CL", "NYMEX", "FUT",  "201710"));
 		
 		// Instrument add E7
-		trader.instList.add(new Instrument());
+		trader.instList.add(new Instrument(2, "CL", "NYMEX", "FUT", "201710"));
 		
 		// Trade
 		trader.trade();
