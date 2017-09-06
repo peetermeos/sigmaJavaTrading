@@ -3,33 +3,57 @@
  */
 package sigma.trading.news;
 
+import java.util.Vector;
 import com.ib.client.Contract;
 import com.ib.client.Execution;
-
+import com.ib.client.Order;
+import com.ib.client.TagValue;
 import sigma.trading.TwsConnector;
-// import sigma.utils.TraderState;
 
 /**
  * @author Peeter Meos
  * @version 0.1
  *
  */
-public class Connector extends TwsConnector{
+public class Connector extends TwsConnector {
 
 	/**
-	 * 
+	 * Places bracket order set to the market.
+	 *
+	 * @param i Instrument order ID
+	 * @param c Contract
+	 * @param o Order
 	 */
-	public void twsConnect() {
-		// TODO Auto-generated method stub
-		
+	public void placeOrder(int i, Contract c, Order o) {
+		if (tws.isConnected()) {
+			tws.placeOrder(i, c, o);
+		} else {
+			logger.error("Cannot place order, not connected to TWS.");
+		}
 	}
-
+	
 	/**
-	 * 
+	 * Request market data for given contract.
+	 * @param c
 	 */
-	public void twsDisconnect() {
-		// TODO Auto-generated method stub
+	public void reqMktData(Contract c) {
+		Vector<TagValue> mktDataOptions = new Vector<>();
 		
+		if (tws.isConnected()) {
+			String genericTickList = null;
+			
+			tws.reqMktData(nextOrderID, c, genericTickList, false, mktDataOptions);
+		} else {
+			logger.error("Cannot request data, not connected to TWS.");
+		}	
+	}
+	
+	/**
+	 * Returns connection status
+	 * @return connection status
+	 */
+	public boolean isConnected() {
+		return tws.isConnected();
 	}
 	
 	/**

@@ -5,7 +5,10 @@ package sigma.trading.news;
 
 import com.ib.client.Contract;
 import com.ib.client.Order;
+import com.ib.client.OrderType;
+import com.ib.client.Types.Action;
 
+import sigma.utils.Helper;
 import sigma.utils.OptSide;
 
 /**
@@ -17,7 +20,7 @@ public class Instrument extends sigma.trading.Instrument {
     // Contract structure
 	private Contract inst = null;
 	
-	private int ID;
+	private long id;
    
     private Order longStop;
     private Order shortStop;
@@ -42,11 +45,13 @@ public class Instrument extends sigma.trading.Instrument {
     	inst.secType(m_secType);
     	inst.exchange(m_exchange);
     	inst.lastTradeDateOrContractMonth(m_expiry);
+    	
+    	id = Math.round(Math.random() * 1000);
     }
     
-    public Instrument(int ID, String m_symbol, String m_secType, String m_exchange, String m_expiry) {
+    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry) {
     	this(m_symbol, m_secType, m_exchange, m_expiry);
-    	this.ID = ID;
+    	this.id = iD;
     	
     	inst = new Contract();
     	
@@ -66,11 +71,74 @@ public class Instrument extends sigma.trading.Instrument {
     	inst.lastTradeDateOrContractMonth(m_expiry);
     	inst.strike(m_strike);
     	inst.right(m_side.toString());
+    	
+    	id = Math.round(Math.random() * 1000);
     }
     
-    public Instrument(int ID, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
+    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
     	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
-    	this.ID = ID;
+    	this.id = iD;
+    }
+    
+    /**
+     * Creates order set for the instrument and submits them via API
+     * 
+     * @param con Connector to TWS
+     */
+    public void createOrders(Connector con) {
+    	// First request data for the instrument
+    	con.reqMktData(inst);
+    	
+    	// Wait for the data to arrive
+    	while (currentSpot < 0) {
+    		Helper.sleep(100);
+    	}
+    	    	
+    	// Create orders
+    	longStop = new Order();
+    	shortStop = new Order();
+    	longTrail = new Order();
+    	shortTrail = new Order();
+    	
+    	// TODO Prices are missing
+    	longStop.action(Action.BUY);
+    	longStop.orderType(OrderType.STP_LMT);
+    	longStop.totalQuantity(q);
+    	longStop.outsideRth(true);
+    	longStop.transmit(false);
+    	
+    	shortStop.action(Action.SELL);
+    	shortStop.orderType(OrderType.STP_LMT);
+    	shortStop.totalQuantity(q);
+    	shortStop.outsideRth(true);
+    	shortStop.transmit(false);
+    	
+    	longTrail.action(Action.SELL);
+    	longTrail.orderType(OrderType.TRAIL_LIMIT);
+    	longTrail.totalQuantity(q);
+    	longTrail.outsideRth(true);
+    	longTrail.transmit(true);
+    	
+    	shortTrail.action(Action.BUY);
+    	shortTrail.orderType(OrderType.TRAIL_LIMIT);
+    	shortTrail.totalQuantity(q);
+    	shortTrail.outsideRth(true);
+    	shortTrail.transmit(true);
+    	
+    	// Submit orders to TWS
+    	con.placeOrder((int) (id + 0), inst, longStop);
+    	con.placeOrder((int) (id + 1), inst, shortStop);
+    	con.placeOrder((int) (id + 2), inst, longTrail);
+    	con.placeOrder((int) (id + 3), inst, shortTrail);
+    }
+    
+    /**
+     * Adjust order set to the market
+     * 
+     * @param con Connector to TWS
+     */
+    public void adjustOrders(Connector con) {
+    	// To be implemented
     }
     
 	/**
@@ -123,20 +191,17 @@ public class Instrument extends sigma.trading.Instrument {
 	}
 
 
-
 	/**
 	 * @return the iD
 	 */
-	public int getID() {
-		return ID;
+	public long getID() {
+		return id;
 	}
-
-
 
 	/**
 	 * @param iD the iD to set
 	 */
 	public void setID(int iD) {
-		ID = iD;
+		id = iD;
 	}
 }
