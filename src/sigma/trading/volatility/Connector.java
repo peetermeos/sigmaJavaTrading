@@ -1,4 +1,7 @@
-package sigma.trading;
+/**
+ * 
+ */
+package sigma.trading.volatility;
 
 
 import java.util.List;
@@ -10,14 +13,15 @@ import com.ib.client.TagValue;
 import com.ib.client.Types.SecType;
 
 import sigma.utils.Helper;
-
+import sigma.trading.Instrument;
+import sigma.trading.TwsConnector;;
 
 /**
  * TWS Connector for volatility surface mapping
  * @author Peeter Meos
  *
  */
-public class VolConnector extends TwsConnector {
+public class Connector extends TwsConnector {
 	
 	private Contract inst;
 	private int underConID = -1;
@@ -27,7 +31,7 @@ public class VolConnector extends TwsConnector {
 	 * Constructs VolConnector instance that does the TWS connection
 	 * and information retrieval.
 	 */
-	public VolConnector() {
+	public Connector() {
 		super("TWS Volatility Optimizer Connector");
 	}
 	

@@ -132,6 +132,14 @@ public class TwsConnector implements EWrapper {
 	}
 	
 	/**
+	 * Logs a given message
+	 * @param str
+	 */
+	public void log(String str) {
+		logger.log(str);
+	}
+	
+	/**
 	 * Starts message processor thread.
 	 */
 	protected void processMessages() {

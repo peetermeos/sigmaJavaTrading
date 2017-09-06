@@ -1,6 +1,10 @@
-package sigma.trading;
+/**
+ * 
+ */
+package sigma.trading.volatility;
 
 import sigma.optimiser.MaximiseTheta;
+import sigma.trading.Instrument;
 import sigma.utils.Helper;
 import sigma.utils.OptSide;
 
@@ -21,8 +25,8 @@ import java.util.Set;
  * @version 0.1
  *
  */
-public class VolTrader {
-	VolConnector tws;
+public class Trader {
+	Connector tws;
 	MaximiseTheta opt;
 	List<Option> options;
 	private Set<String> expirySet;
@@ -35,8 +39,8 @@ public class VolTrader {
 	 * Creates all the required objects and the solution 
 	 * space for optimal portfolio (ie. expiries x strikes)
 	 */
-	public VolTrader() {
-		tws = new VolConnector();
+	public Trader() {
+		tws = new Connector();
 		options = new ArrayList<Option>();
 		expirySet = new HashSet<String>();
 		strikeSet = new HashSet<Double>();
@@ -81,7 +85,7 @@ public class VolTrader {
 	 *        units - currency  
 	 */
 	public void optimisePortoflio(double maxGamma, double minTheta) {
-		tws.logger.log("Optimising portfolio");	
+		tws.log("Optimising portfolio");	
 		opt = new MaximiseTheta();
 	}
 	
@@ -91,10 +95,10 @@ public class VolTrader {
 	 * @param args Command line parameters for the trader code.
 	 */
 	public static void main(String[] args) {
-		VolTrader trader;
+		Trader trader;
 		
 		// TODO Get volatility surface and portfolio here
-		trader = new VolTrader();
+		trader = new Trader();
 		trader.tws.twsConnect();
 		trader.tws.retrievePortfolio();
 		
