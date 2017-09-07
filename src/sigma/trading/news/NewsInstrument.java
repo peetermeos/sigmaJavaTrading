@@ -321,6 +321,15 @@ public class NewsInstrument extends Instrument {
     	}    	
     }
     
+    /**
+     * Processes trades, checks executions adjusts system state accordingly
+     * 
+     * @param con
+     */
+    public void processTrades(Connector con) {
+    	// TODO not implemented
+    }
+    
 	/**
 	 * @return the delta
 	 */

@@ -13,27 +13,26 @@ import java.util.Date;
  */
 public class Trade {
 	String symbol;
-	double q;
+	int q;
 	
-	double entryPrice;
-	Date entryDtg;
+	double price;
+	Date dtg;
 	
-	double exitPrice;
-	Date exitDtg;
+	String side;
 	
 	/**
 	 * Simple constructor for trade that assigns entry
 	 * @param sym
 	 * @param q 
 	 * @param entry
+	 * @param side
 	 * @param dtg
 	 */
-	public Trade(String sym, double q, double entry, Date dtg) {
+	public Trade(String sym, int q, double entry, String side, Date dtg) {
 		this.symbol = sym;
 		this.q = q;
-		entryPrice = entry;
-		entryDtg = dtg;
-		exitPrice = -1;
-		exitDtg = null;
+		this.price = entry;
+		this.dtg = dtg;
+		this.side = side;
 	}
 }

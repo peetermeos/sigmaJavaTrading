@@ -59,7 +59,7 @@ public class Trader {
 		try {
 			// Infinite loop until keypress
 			while (System.in.available() == 0) {
-				Thread.sleep(100);
+				Thread.sleep(10);
 				
 				// Get last prices, adjust prices if needed
 				for(NewsInstrument item: instList) {
@@ -69,6 +69,9 @@ public class Trader {
 						// Adjust orders
 						item.adjustOrders(con);
 					}
+					
+					// Check for executions
+					item.processTrades(con);
 				}
 
 				// Here check key presses to arm/disarm/quit trader

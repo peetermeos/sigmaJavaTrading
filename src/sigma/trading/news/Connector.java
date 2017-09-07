@@ -132,7 +132,7 @@ public class Connector extends TwsConnector {
 		
 		logger.log("New execution for " + contract.symbol());	
 
-		trades.add(new Trade(contract.symbol(), execution.cumQty(), execution.price(), new Date()));
+		trades.add(new Trade(contract.symbol(), execution.cumQty(), execution.price(), execution.side(), new Date()));
 		
 		// If the order was regular stop limit (entry)
 		//if ((execution.orderId() == oID) || (execution.orderId() == oID + 1)) {
