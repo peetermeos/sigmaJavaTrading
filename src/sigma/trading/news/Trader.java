@@ -47,6 +47,8 @@ public class Trader {
 	 * The main trading loop
 	 */
 	public void trade() {
+		
+		double diff = 0;
 	
 		if (!con.isConnected()) {
 			logger.error("doTrading(): Not connected to TWS.");
@@ -61,7 +63,9 @@ public class Trader {
 				
 				// Get last prices, adjust prices if needed
 				for(NewsInstrument item: instList) {
-					if (Math.abs(con.getPrice(item.getID()) - item.getLast()) > item.getAdjLimit() ) {
+					diff = con.getPrice(item.getID()) - item.getLast();
+					logger.verbose("Diff  for " + item.getSymbol() + " is " + diff);
+					if (Math.abs(diff) > item.getAdjLimit() ) {
 						// Adjust orders
 						item.adjustOrders(con);
 					}
@@ -106,6 +110,7 @@ public class Trader {
 		
 		// Connect
 		trader.connect();
+		trader.con.setSimulated(true);
 		
 		// Instrument add CL
 		trader.log("Adding CL");

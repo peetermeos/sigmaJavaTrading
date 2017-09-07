@@ -115,8 +115,11 @@ public class Connector extends TwsConnector {
 		default:
 			tckType = null;
 		}
-		if (tckType != null) {
-			logger.log("Price ticker " + tickerId + " field " + tckType + " price " + price);	
+		
+		// Adjustment needs to be done here
+		
+		if (tckType == "last") {
+			logger.verbose("Price ticker " + tickerId + " field " + tckType + " price " + price);	
 		}
 			
 	}

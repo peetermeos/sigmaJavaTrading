@@ -3,6 +3,8 @@
  */
 package sigma.trading.news;
 
+import java.util.Random;
+
 import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderType;
@@ -38,6 +40,8 @@ public class NewsInstrument extends Instrument {
     private double adjLimit = 0.02;
     private double trailAmt = 0;
     private double q = 0;
+    
+    private int oid = 0;
     
     /**
      * Constructor for news trader instrument class.
@@ -81,7 +85,8 @@ public class NewsInstrument extends Instrument {
     	inst.exchange(m_exchange);
     	inst.lastTradeDateOrContractMonth(m_expiry);
     	
-    	id = (int) (Math.round(Math.random() * 1000));
+    	// id = (int) (Math.round(Math.random() * 1000));
+    	id = new Random().nextInt(1000);
     	state = TraderState.WAIT;
     }
     
@@ -149,7 +154,8 @@ public class NewsInstrument extends Instrument {
     	inst.strike(m_strike);
     	inst.right(m_side.toString());
     	
-    	id = (int) (Math.round(Math.random() * 1000));
+    	//id = (int) (Math.round(Math.random() * 1000));
+    	id = new Random().nextInt(1000);
     	state = TraderState.WAIT;
     }
     
@@ -189,20 +195,20 @@ public class NewsInstrument extends Instrument {
     	// Wait for the data to arrive
     	logger.log("Waiting for data for " + this.getSymbol() + " with ticker id " + this.getID());
     	while (con.getPrice(id) <= 0) {
-    		Helper.sleep(100);
+    		Helper.sleep(10);
     	}
     	last = con.getPrice(id);
     	
     	logger.log("Price for " + this.getSymbol() + " received: " + last);
     	    	
     	// Update order ID
-    	int oid = con.getOrderID();
-    	con.reqId();
-    	logger.verbose("Waiting for next order id");
-    	while (oid == con.getOrderID()) {
-    		Helper.sleep(10);
-    	}
     	oid = con.getOrderID();
+    	con.reqId();
+    	logger.log("Waiting for next order id"); 	
+   		Helper.sleep(10);
+
+    	oid = con.getOrderID();
+    	logger.log("Order ID received");
     	
     	// Create orders
     	longStop = new Order();
@@ -250,8 +256,10 @@ public class NewsInstrument extends Instrument {
     	shortTrail.orderId((int) (oid + 3));
     	
 		// OCO groupings and attached orders
-		longStop.ocaGroup("News" + inst.symbol());
-		shortStop.ocaGroup("News" + inst.symbol());
+    	int ocaNum = new Random().nextInt(1000);
+    	
+    	longStop.ocaGroup("News" + inst.symbol() + ocaNum);
+		shortStop.ocaGroup("News" + inst.symbol() + ocaNum);
     	
     	// Submit orders to TWS
     	con.placeOrder((int) (oid + 0), inst, longStop);
@@ -269,7 +277,48 @@ public class NewsInstrument extends Instrument {
      * @param con Connector to TWS
      */
     public void adjustOrders(Connector con) {
-    	// TODO To be implemented
+    	// Check if price differs enough
+    	double spot = -1;
+    	Logger logger = new Logger();
+    	logger.log("Adjusting price for " + getSymbol());
+    	
+    	// Find last price
+    	for (int i=0;i < con.prices.size(); i++) {
+    		if (con.prices.get(i).getId() == id) {
+    			spot = con.prices.get(i).getPrice();
+    			
+    		}
+    	}
+    	
+    	// Is the difference significant?
+    	if (Math.abs(spot - last) > getAdjLimit() && spot != -1) {
+    		last = spot;
+    		
+        	// Update order details
+        	longStop.lmtPrice(last + delta);
+        	longStop.auxPrice(last + delta);
+        	longStop.outsideRth(true);
+        	longStop.transmit(true);
+        	
+        	shortStop.lmtPrice(last - delta);
+        	shortStop.auxPrice(last - delta);
+        	shortStop.outsideRth(true);
+        	shortStop.transmit(true);
+        	
+        	longTrail.trailStopPrice(last);
+        	longTrail.outsideRth(true);
+        	longTrail.transmit(true);
+        	
+    		shortTrail.trailStopPrice(last);
+        	shortTrail.outsideRth(true);
+        	shortTrail.transmit(true);
+    		
+        	// Submit orders to TWS
+        	con.placeOrder((int) (oid + 0), inst, longStop);
+        	con.placeOrder((int) (oid + 1), inst, shortStop);
+        	con.placeOrder((int) (oid + 2), inst, longTrail);
+        	con.placeOrder((int) (oid + 3), inst, shortTrail);
+    	}    	
     }
     
 	/**
