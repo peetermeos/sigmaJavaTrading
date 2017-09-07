@@ -93,11 +93,11 @@ public class Trader {
 		
 		// Instrument add CL
 		trader.log("Adding CL");
-		trader.instList.add(new Instrument(1, "CL", "NYMEX", "FUT",  "201710"));
+		trader.instList.add(new Instrument("CL", "NYMEX", "FUT",  "201710", 1, 0.1, 0.05));
 		
 		// Instrument add E7
 		trader.log("Adding EURO");
-		trader.instList.add(new Instrument(2, "E7", "GLOBEX", "FUT", "201712"));
+		trader.instList.add(new Instrument("E7", "GLOBEX", "FUT", "201712", 1, 0.0005, 0.0002));
 
 		// Create and submit orders
 		for(Instrument item: trader.instList) {

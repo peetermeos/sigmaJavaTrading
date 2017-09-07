@@ -13,20 +13,22 @@ import sigma.utils.OptSide;
 
 /**
  * @author Peeter Meos
- * @version 0.1
+ * @version 0.2
  *
  */
 public class Instrument extends sigma.trading.Instrument {
     // Contract structure
 	private Contract inst = null;
 	
-	private long id;
+	private int id;
    
+	// Orders
     private Order longStop;
     private Order shortStop;
     private Order longTrail;
     private Order shortTrail;
     
+    // Prices and parameters
     private double spotPrice = -1;
     private double currentSpot = -1;
     private double delta = 0;
@@ -34,11 +36,24 @@ public class Instrument extends sigma.trading.Instrument {
     private double trailAmt = 0;
     private double q = 0;
     
-    /** 
-     * Standard constructors for the news trader instrument class
+    /**
+     * 
+     * @param m_symbol
+     * @param m_secType
+     * @param m_exchange
+     * @param m_expiry
+     * @param q
+     * @param delta
+     * @param trailAmt
      */
-    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry) {
+    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry,
+    				  int q, double delta, double trailAmt) {
     	super(m_symbol, m_secType, m_exchange, m_expiry);
+    	
+    	// Initialise trading parameters
+    	this.q = q;
+    	this.delta = delta;
+    	this.trailAmt = trailAmt;
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
@@ -46,23 +61,46 @@ public class Instrument extends sigma.trading.Instrument {
     	inst.exchange(m_exchange);
     	inst.lastTradeDateOrContractMonth(m_expiry);
     	
-    	id = Math.round(Math.random() * 1000);
+    	id = (int) (Math.round(Math.random() * 1000));
     }
     
-    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry) {
-    	this(m_symbol, m_secType, m_exchange, m_expiry);
-    	this.id = iD;
-    	
-    	inst = new Contract();
-    	
-    	longStop = new Order();
-    	shortStop = new Order();
-    	longTrail = new Order();
-    	shortTrail = new Order();
+    /**
+     * 
+     * @param iD
+     * @param m_symbol
+     * @param m_secType
+     * @param m_exchange
+     * @param m_expiry
+     * @param q
+     * @param delta
+     * @param trailAmt
+     */
+    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry,
+    		int q, double delta, double trailAmt) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, q, delta, trailAmt);
+    	this.id = iD;  	
     } 
     
-    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
+    /**
+     * 
+     * @param m_symbol
+     * @param m_secType
+     * @param m_exchange
+     * @param m_expiry
+     * @param m_strike
+     * @param m_side
+     * @param q
+     * @param delta
+     * @param trailAmt
+     */
+    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
+    		int q, double delta, double trailAmt) {
     	super(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
+    
+    	// Initialise trading parameters
+    	this.q = q;
+    	this.delta = delta;
+    	this.trailAmt = trailAmt;
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
@@ -72,11 +110,25 @@ public class Instrument extends sigma.trading.Instrument {
     	inst.strike(m_strike);
     	inst.right(m_side.toString());
     	
-    	id = Math.round(Math.random() * 1000);
+    	id = (int) (Math.round(Math.random() * 1000));
     }
     
-    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side) {
-    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
+    /**
+     * 
+     * @param iD
+     * @param m_symbol
+     * @param m_secType
+     * @param m_exchange
+     * @param m_expiry
+     * @param m_strike
+     * @param m_side
+     * @param q
+     * @param delta
+     * @param trailAmt 
+     */
+    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
+    		int q, double delta, double trailAmt) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side, q, delta, trailAmt);
     	this.id = iD;
     }
     
@@ -86,6 +138,7 @@ public class Instrument extends sigma.trading.Instrument {
      * @param con Connector to TWS
      */
     public void createOrders(Connector con) {
+  	
     	// First request data for the instrument
     	con.reqMktData(inst);
     	
@@ -104,26 +157,40 @@ public class Instrument extends sigma.trading.Instrument {
     	longStop.action(Action.BUY);
     	longStop.orderType(OrderType.STP_LMT);
     	longStop.totalQuantity(q);
+    	longStop.lmtPrice(spotPrice + delta);
+    	longStop.auxPrice(spotPrice + delta);
     	longStop.outsideRth(true);
     	longStop.transmit(false);
+    	longStop.orderId((int) id);
     	
     	shortStop.action(Action.SELL);
     	shortStop.orderType(OrderType.STP_LMT);
     	shortStop.totalQuantity(q);
+    	shortStop.lmtPrice(spotPrice - delta);
+    	shortStop.auxPrice(spotPrice - delta);
     	shortStop.outsideRth(true);
     	shortStop.transmit(false);
+    	longStop.orderId((int) (id + 1));
     	
     	longTrail.action(Action.SELL);
     	longTrail.orderType(OrderType.TRAIL_LIMIT);
     	longTrail.totalQuantity(q);
+    	longTrail.trailStopPrice(spotPrice);
+    	longTrail.auxPrice(trailAmt);
+    	longTrail.parentId(shortStop.orderId());
     	longTrail.outsideRth(true);
     	longTrail.transmit(true);
+    	longStop.orderId((int) (id + 2));
     	
     	shortTrail.action(Action.BUY);
     	shortTrail.orderType(OrderType.TRAIL_LIMIT);
     	shortTrail.totalQuantity(q);
+		shortTrail.trailStopPrice(spotPrice);
+		shortTrail.auxPrice(trailAmt);
+		shortTrail.parentId(shortStop.orderId());
     	shortTrail.outsideRth(true);
     	shortTrail.transmit(true);
+    	longStop.orderId((int) (id + 3));
     	
     	// Submit orders to TWS
     	con.placeOrder((int) (id + 0), inst, longStop);

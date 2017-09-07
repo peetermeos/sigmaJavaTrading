@@ -3,6 +3,8 @@
  */
 package sigma.trading.news;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import com.ib.client.Contract;
 import com.ib.client.Execution;
@@ -16,7 +18,17 @@ import sigma.trading.TwsConnector;
  *
  */
 public class Connector extends TwsConnector {
-
+	
+	List<Ticker> prices;
+	
+	/**
+	 * Constructor just adds recordkeeping of ticker prices to twsConnector
+	 */
+	public Connector() {
+		super();
+		prices = new ArrayList<>();
+	}
+	
 	/**
 	 * Places bracket order set to the market.
 	 *
@@ -57,12 +69,21 @@ public class Connector extends TwsConnector {
 	}
 	
 	/**
+	 * Returns prices list
+	 * @return
+	 */
+	public List<Ticker> getPrices() {
+		return(prices);
+	}
+	
+	/**
 	 * Overriden tickPrice method that updates current spot price of the instrument and
 	 * if needed, adjusts the orders.
 	 */
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
 		String tckType = null;
+		boolean found = false;
 		
 		// Currently assumes only one instrument and ticker id.
 		// If we trade many, then many ticker IDs are needed.
@@ -76,7 +97,19 @@ public class Connector extends TwsConnector {
 			break;
 		case 4:
 			tckType = "last";
-			//this.spotPrice = price;
+			
+			// Try to update existing ticker data
+			for (int i = 0; i < prices.size(); i++) {
+				if(prices.get(i).getId() == tickerId) {
+					found = true;
+					prices.get(i).setPrice(price);
+				}
+			}
+			
+			// If not found add new ticker
+			if (!found) {
+				prices.add(new Ticker(tickerId, price));
+			}
 			break;
 		default:
 			tckType = null;
