@@ -40,6 +40,7 @@ public class Trader {
 	 * The main trading loop
 	 */
 	public void trade() {
+	
 		if (!con.isConnected()) {
 			logger.error("doTrading(): Not connected to TWS.");
 			return;
@@ -50,7 +51,15 @@ public class Trader {
 			// Infinite loop until keypress
 			while (System.in.available() == 0) {
 				Thread.sleep(100);
-				// Here check open orders and adjust them if needed
+				
+				// Get last prices, adjust prices if needed
+				for(Instrument item: instList) {
+					if (Math.abs(con.getPrice(item.getID()) - item.getLast()) > item.getAdjLimit() ) {
+						// Adjust orders
+						item.adjustOrders(con);
+					}
+				}
+
 				// Here check key presses to arm/disarm/quit trader
 			}
 			
@@ -93,11 +102,11 @@ public class Trader {
 		
 		// Instrument add CL
 		trader.log("Adding CL");
-		trader.instList.add(new Instrument("CL", "NYMEX", "FUT",  "201710", 1, 0.1, 0.05));
+		trader.instList.add(new Instrument("CL", "NYMEX", "FUT",  "201710", 1, 0.1, 0.05, 0.02));
 		
 		// Instrument add E7
 		trader.log("Adding EURO");
-		trader.instList.add(new Instrument("E7", "GLOBEX", "FUT", "201712", 1, 0.0005, 0.0002));
+		trader.instList.add(new Instrument("E7", "GLOBEX", "FUT", "201712", 1, 0.0005, 0.0003, 0.0002));
 
 		// Create and submit orders
 		for(Instrument item: trader.instList) {

@@ -6,7 +6,7 @@ import com.ib.client.Contract;
 /**
  * 
  * @author Peeter Meos
- * @version 0.2
+ * @version 0.3
  *
  */
 public class Instrument {
@@ -18,14 +18,16 @@ public class Instrument {
 	private Double strike;
 	private OptSide side;
 	
-	private Contract inst;
+	protected Contract inst;
 	private Contract ul;
 	
-	private double bid;
-	private double ask;
-	private double last;
+	protected double bid = -1;
+	protected double ask = -1;
+	protected double last = -1;
+	
 	private double prvClose;
-	private long secID;
+	
+	protected int id;
 	
 	/**
 	 * Constructor method for Instrument class for stocks and futures
@@ -156,15 +158,15 @@ public class Instrument {
 	/**
 	 * @return the secID
 	 */
-	public long getSecID() {
-		return secID;
+	public int getID() {
+		return id;
 	}
 
 	/**
-	 * @param secID the secID to set
+	 * @param id the id to set
 	 */
-	public void setSecID(long secID) {
-		this.secID = secID;
+	public void setID(int id) {
+		this.id = id;
 	}
 
 	/**

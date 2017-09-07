@@ -77,6 +77,22 @@ public class Connector extends TwsConnector {
 	}
 	
 	/**
+	 * Returns last known price of the instrument
+	 * 
+	 * @param id Instrument ticker ID
+	 * @return Last price of the instrument
+	 */
+	public double getPrice(int id) {
+		
+		for (int i = 0; i < prices.size(); i++) { 
+			if (prices.get(i).getId() == id) {
+				return(prices.get(i).getPrice());
+			}
+		}
+		return(-1);
+	}
+	
+	/**
 	 * Overriden tickPrice method that updates current spot price of the instrument and
 	 * if needed, adjusts the orders.
 	 */
@@ -118,10 +134,6 @@ public class Connector extends TwsConnector {
 			logger.log("Price ticker " + tickerId + " field " + tckType + " price " + price);	
 		}
 			
-		// Adjust orders if price has moved too much
-		//if (this.currentSpot > 0 && this.state == TraderState.LIVE) {
-		//	adjustOrders(price);
-		//}
 	}
 	
 	/**

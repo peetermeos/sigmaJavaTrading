@@ -12,16 +12,15 @@ import sigma.utils.Helper;
 import sigma.utils.OptSide;
 
 /**
+ * Instrument class for News Trading.
+ * Extends general instrument.
+ * 
  * @author Peeter Meos
  * @version 0.2
  *
  */
 public class Instrument extends sigma.trading.Instrument {
-    // Contract structure
-	private Contract inst = null;
-	
-	private int id;
-   
+	  
 	// Orders
     private Order longStop;
     private Order shortStop;
@@ -29,7 +28,6 @@ public class Instrument extends sigma.trading.Instrument {
     private Order shortTrail;
     
     // Prices and parameters
-    private double spotPrice = -1;
     private double currentSpot = -1;
     private double delta = 0;
     private double adjLimit = 0.02;
@@ -37,6 +35,7 @@ public class Instrument extends sigma.trading.Instrument {
     private double q = 0;
     
     /**
+     * Constructor for news trader instrument class.
      * 
      * @param m_symbol
      * @param m_secType
@@ -45,15 +44,17 @@ public class Instrument extends sigma.trading.Instrument {
      * @param q
      * @param delta
      * @param trailAmt
+     * @param adjLimit
      */
     public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry,
-    				  int q, double delta, double trailAmt) {
+    				  int q, double delta, double trailAmt, double adjLimit) {
     	super(m_symbol, m_secType, m_exchange, m_expiry);
     	
     	// Initialise trading parameters
     	this.q = q;
     	this.delta = delta;
     	this.trailAmt = trailAmt;
+    	this.adjLimit = adjLimit;
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
@@ -65,6 +66,7 @@ public class Instrument extends sigma.trading.Instrument {
     }
     
     /**
+     * Constructor for news trader instrument class.
      * 
      * @param iD
      * @param m_symbol
@@ -74,14 +76,16 @@ public class Instrument extends sigma.trading.Instrument {
      * @param q
      * @param delta
      * @param trailAmt
+     * @param adjLimit
      */
     public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry,
-    		int q, double delta, double trailAmt) {
-    	this(m_symbol, m_secType, m_exchange, m_expiry, q, delta, trailAmt);
+    		int q, double delta, double trailAmt, double adjLimit) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, q, delta, trailAmt, adjLimit);
     	this.id = iD;  	
     } 
     
     /**
+     * Constructor for news trader instrument class.
      * 
      * @param m_symbol
      * @param m_secType
@@ -92,15 +96,17 @@ public class Instrument extends sigma.trading.Instrument {
      * @param q
      * @param delta
      * @param trailAmt
+     * @param adjLimit
      */
     public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
-    		int q, double delta, double trailAmt) {
+    		int q, double delta, double trailAmt, double adjLimit) {
     	super(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
     
     	// Initialise trading parameters
     	this.q = q;
     	this.delta = delta;
     	this.trailAmt = trailAmt;
+    	this.adjLimit = adjLimit;
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
@@ -114,6 +120,7 @@ public class Instrument extends sigma.trading.Instrument {
     }
     
     /**
+     * Constructor for news trader instrument class.
      * 
      * @param iD
      * @param m_symbol
@@ -125,10 +132,11 @@ public class Instrument extends sigma.trading.Instrument {
      * @param q
      * @param delta
      * @param trailAmt 
+     * @param adjLimit
      */
     public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
-    		int q, double delta, double trailAmt) {
-    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side, q, delta, trailAmt);
+    		int q, double delta, double trailAmt, double adjLimit) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side, q, delta, trailAmt, adjLimit);
     	this.id = iD;
     }
     
@@ -157,8 +165,8 @@ public class Instrument extends sigma.trading.Instrument {
     	longStop.action(Action.BUY);
     	longStop.orderType(OrderType.STP_LMT);
     	longStop.totalQuantity(q);
-    	longStop.lmtPrice(spotPrice + delta);
-    	longStop.auxPrice(spotPrice + delta);
+    	longStop.lmtPrice(last + delta);
+    	longStop.auxPrice(last + delta);
     	longStop.outsideRth(true);
     	longStop.transmit(false);
     	longStop.orderId((int) id);
@@ -166,8 +174,8 @@ public class Instrument extends sigma.trading.Instrument {
     	shortStop.action(Action.SELL);
     	shortStop.orderType(OrderType.STP_LMT);
     	shortStop.totalQuantity(q);
-    	shortStop.lmtPrice(spotPrice - delta);
-    	shortStop.auxPrice(spotPrice - delta);
+    	shortStop.lmtPrice(last - delta);
+    	shortStop.auxPrice(last - delta);
     	shortStop.outsideRth(true);
     	shortStop.transmit(false);
     	longStop.orderId((int) (id + 1));
@@ -175,7 +183,7 @@ public class Instrument extends sigma.trading.Instrument {
     	longTrail.action(Action.SELL);
     	longTrail.orderType(OrderType.TRAIL_LIMIT);
     	longTrail.totalQuantity(q);
-    	longTrail.trailStopPrice(spotPrice);
+    	longTrail.trailStopPrice(last);
     	longTrail.auxPrice(trailAmt);
     	longTrail.parentId(shortStop.orderId());
     	longTrail.outsideRth(true);
@@ -185,7 +193,7 @@ public class Instrument extends sigma.trading.Instrument {
     	shortTrail.action(Action.BUY);
     	shortTrail.orderType(OrderType.TRAIL_LIMIT);
     	shortTrail.totalQuantity(q);
-		shortTrail.trailStopPrice(spotPrice);
+		shortTrail.trailStopPrice(last);
 		shortTrail.auxPrice(trailAmt);
 		shortTrail.parentId(shortStop.orderId());
     	shortTrail.outsideRth(true);
@@ -257,18 +265,4 @@ public class Instrument extends sigma.trading.Instrument {
 		this.q = q;
 	}
 
-
-	/**
-	 * @return the iD
-	 */
-	public long getID() {
-		return id;
-	}
-
-	/**
-	 * @param iD the iD to set
-	 */
-	public void setID(int iD) {
-		id = iD;
-	}
 }
