@@ -10,9 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import sigma.utils.Logger;
 
+/**
+ * Trader class for news trading
+ * 
+ * @author Peeter Meos
+ * @version 0.1
+ *
+ */
 public class Trader {
 	
-	public List<Instrument> instList;
+	public List<NewsInstrument> instList;
 	
 	protected Logger logger; 
 	protected Connector con;
@@ -53,7 +60,7 @@ public class Trader {
 				Thread.sleep(100);
 				
 				// Get last prices, adjust prices if needed
-				for(Instrument item: instList) {
+				for(NewsInstrument item: instList) {
 					if (Math.abs(con.getPrice(item.getID()) - item.getLast()) > item.getAdjLimit() ) {
 						// Adjust orders
 						item.adjustOrders(con);
@@ -102,14 +109,15 @@ public class Trader {
 		
 		// Instrument add CL
 		trader.log("Adding CL");
-		trader.instList.add(new Instrument("CL", "NYMEX", "FUT",  "201710", 1, 0.1, 0.05, 0.02));
+		trader.instList.add(new NewsInstrument("CL", "FUT", "NYMEX",  "201710", 1, 0.1, 0.15, 0.05));
 		
 		// Instrument add E7
 		trader.log("Adding EURO");
-		trader.instList.add(new Instrument("E7", "GLOBEX", "FUT", "201712", 1, 0.0005, 0.0003, 0.0002));
+		trader.instList.add(new NewsInstrument("E7", "FUT", "GLOBEX", "201712", 1, 0.0005, 0.0003, 0.0002));
 
 		// Create and submit orders
-		for(Instrument item: trader.instList) {
+		for(NewsInstrument item: trader.instList) {
+			trader.log("Creating order for " + item.getSymbol());
 			item.createOrders(trader.con);
 		}
 		

@@ -7,9 +7,13 @@ import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderType;
 import com.ib.client.Types.Action;
+import com.ib.client.Types.SecType;
 
+import sigma.trading.Instrument;
 import sigma.utils.Helper;
+import sigma.utils.Logger;
 import sigma.utils.OptSide;
+import sigma.utils.TraderState;
 
 /**
  * Instrument class for News Trading.
@@ -19,8 +23,10 @@ import sigma.utils.OptSide;
  * @version 0.2
  *
  */
-public class Instrument extends sigma.trading.Instrument {
-	  
+public class NewsInstrument extends Instrument {
+	// State
+	TraderState state;
+	
 	// Orders
     private Order longStop;
     private Order shortStop;
@@ -28,7 +34,6 @@ public class Instrument extends sigma.trading.Instrument {
     private Order shortTrail;
     
     // Prices and parameters
-    private double currentSpot = -1;
     private double delta = 0;
     private double adjLimit = 0.02;
     private double trailAmt = 0;
@@ -46,7 +51,7 @@ public class Instrument extends sigma.trading.Instrument {
      * @param trailAmt
      * @param adjLimit
      */
-    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry,
+    public NewsInstrument(String m_symbol, String m_secType, String m_exchange, String m_expiry,
     				  int q, double delta, double trailAmt, double adjLimit) {
     	super(m_symbol, m_secType, m_exchange, m_expiry);
     	
@@ -58,11 +63,26 @@ public class Instrument extends sigma.trading.Instrument {
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
-    	inst.secType(m_secType);
+
+    	switch(m_secType) {
+    	case "FUT":
+    		inst.secType(SecType.FUT);
+    		break;
+    	case "STK":
+    		inst.secType(SecType.STK);
+    		break;
+    	case "FOP":
+    		inst.secType(SecType.FOP);
+    		break;
+        default:
+        	inst.secType(SecType.STK);
+    	}
+    	
     	inst.exchange(m_exchange);
     	inst.lastTradeDateOrContractMonth(m_expiry);
     	
     	id = (int) (Math.round(Math.random() * 1000));
+    	state = TraderState.WAIT;
     }
     
     /**
@@ -78,7 +98,7 @@ public class Instrument extends sigma.trading.Instrument {
      * @param trailAmt
      * @param adjLimit
      */
-    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry,
+    public NewsInstrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry,
     		int q, double delta, double trailAmt, double adjLimit) {
     	this(m_symbol, m_secType, m_exchange, m_expiry, q, delta, trailAmt, adjLimit);
     	this.id = iD;  	
@@ -98,7 +118,7 @@ public class Instrument extends sigma.trading.Instrument {
      * @param trailAmt
      * @param adjLimit
      */
-    public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
+    public NewsInstrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
     		int q, double delta, double trailAmt, double adjLimit) {
     	super(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
     
@@ -110,13 +130,27 @@ public class Instrument extends sigma.trading.Instrument {
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
-    	inst.secType(m_secType);
+    	switch(m_secType) {
+    	case "FUT":
+    		inst.secType(SecType.FUT);
+    		break;
+    	case "STK":
+    		inst.secType(SecType.STK);
+    		break;
+    	case "FOP":
+    		inst.secType(SecType.FOP);
+    		break;
+        default:
+        	inst.secType(SecType.STK);
+    	}
+    	
     	inst.exchange(m_exchange);
     	inst.lastTradeDateOrContractMonth(m_expiry);
     	inst.strike(m_strike);
     	inst.right(m_side.toString());
     	
     	id = (int) (Math.round(Math.random() * 1000));
+    	state = TraderState.WAIT;
     }
     
     /**
@@ -134,7 +168,7 @@ public class Instrument extends sigma.trading.Instrument {
      * @param trailAmt 
      * @param adjLimit
      */
-    public Instrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
+    public NewsInstrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
     		int q, double delta, double trailAmt, double adjLimit) {
     	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side, q, delta, trailAmt, adjLimit);
     	this.id = iD;
@@ -146,22 +180,37 @@ public class Instrument extends sigma.trading.Instrument {
      * @param con Connector to TWS
      */
     public void createOrders(Connector con) {
+    	Logger logger = new Logger();
   	
+    	logger.log("Requesting instrument data for " + this.getSymbol());
     	// First request data for the instrument
-    	con.reqMktData(inst);
+    	con.reqMktData(this.getID(), inst);
     	
     	// Wait for the data to arrive
-    	while (currentSpot < 0) {
+    	logger.log("Waiting for data for " + this.getSymbol() + " with ticker id " + this.getID());
+    	while (con.getPrice(id) <= 0) {
     		Helper.sleep(100);
     	}
+    	last = con.getPrice(id);
+    	
+    	logger.log("Price for " + this.getSymbol() + " received: " + last);
     	    	
+    	// Update order ID
+    	int oid = con.getOrderID();
+    	con.reqId();
+    	logger.verbose("Waiting for next order id");
+    	while (oid == con.getOrderID()) {
+    		Helper.sleep(10);
+    	}
+    	oid = con.getOrderID();
+    	
     	// Create orders
     	longStop = new Order();
     	shortStop = new Order();
     	longTrail = new Order();
     	shortTrail = new Order();
     	
-    	// TODO Prices are missing
+    	// Update order details
     	longStop.action(Action.BUY);
     	longStop.orderType(OrderType.STP_LMT);
     	longStop.totalQuantity(q);
@@ -169,7 +218,7 @@ public class Instrument extends sigma.trading.Instrument {
     	longStop.auxPrice(last + delta);
     	longStop.outsideRth(true);
     	longStop.transmit(false);
-    	longStop.orderId((int) id);
+    	longStop.orderId((int) oid);
     	
     	shortStop.action(Action.SELL);
     	shortStop.orderType(OrderType.STP_LMT);
@@ -178,17 +227,17 @@ public class Instrument extends sigma.trading.Instrument {
     	shortStop.auxPrice(last - delta);
     	shortStop.outsideRth(true);
     	shortStop.transmit(false);
-    	longStop.orderId((int) (id + 1));
+    	shortStop.orderId((int) (oid + 1));
     	
     	longTrail.action(Action.SELL);
     	longTrail.orderType(OrderType.TRAIL_LIMIT);
     	longTrail.totalQuantity(q);
     	longTrail.trailStopPrice(last);
     	longTrail.auxPrice(trailAmt);
-    	longTrail.parentId(shortStop.orderId());
+    	longTrail.parentId(longStop.orderId());
     	longTrail.outsideRth(true);
     	longTrail.transmit(true);
-    	longStop.orderId((int) (id + 2));
+    	longTrail.orderId((int) (oid + 2));
     	
     	shortTrail.action(Action.BUY);
     	shortTrail.orderType(OrderType.TRAIL_LIMIT);
@@ -198,13 +247,20 @@ public class Instrument extends sigma.trading.Instrument {
 		shortTrail.parentId(shortStop.orderId());
     	shortTrail.outsideRth(true);
     	shortTrail.transmit(true);
-    	longStop.orderId((int) (id + 3));
+    	shortTrail.orderId((int) (oid + 3));
+    	
+		// OCO groupings and attached orders
+		longStop.ocaGroup("News" + inst.symbol());
+		shortStop.ocaGroup("News" + inst.symbol());
     	
     	// Submit orders to TWS
-    	con.placeOrder((int) (id + 0), inst, longStop);
-    	con.placeOrder((int) (id + 1), inst, shortStop);
-    	con.placeOrder((int) (id + 2), inst, longTrail);
-    	con.placeOrder((int) (id + 3), inst, shortTrail);
+    	con.placeOrder((int) (oid + 0), inst, longStop);
+    	con.placeOrder((int) (oid + 1), inst, shortStop);
+    	con.placeOrder((int) (oid + 2), inst, longTrail);
+    	con.placeOrder((int) (oid + 3), inst, shortTrail);
+    	
+    	// Change state
+    	state = TraderState.LIVE;
     }
     
     /**
@@ -213,7 +269,7 @@ public class Instrument extends sigma.trading.Instrument {
      * @param con Connector to TWS
      */
     public void adjustOrders(Connector con) {
-    	// To be implemented
+    	// TODO To be implemented
     }
     
 	/**
@@ -263,6 +319,22 @@ public class Instrument extends sigma.trading.Instrument {
 	 */
 	public void setQ(double q) {
 		this.q = q;
+	}
+	
+	/**
+	 * 
+	 * @return state 
+	 */
+	public TraderState getState() {
+		return state;
+	}
+	
+	/**
+	 * Sets trader state
+	 * @param s TraderState
+	 */
+	public void setState(TraderState s) {
+		this.state = s;
 	}
 
 }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sigma.trading.news;
+package sigma.utils;
 
 /**
  * @author Peeter Meos

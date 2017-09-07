@@ -44,10 +44,10 @@ public class Instrument {
 		this.setInst(new Contract());
 		this.setUl(null);
 		
-		this.bid = 0;
-		this.ask = 0;
-		this.last = 0;
-		this.prvClose = 0;	
+		this.bid = -1;
+		this.ask = -1;
+		this.last = -1;
+		this.prvClose = -1;	
 	}
 	
 	/**
@@ -77,10 +77,10 @@ public class Instrument {
 		
 		this.setInst(new Contract());
 		
-		this.bid = 0;
-		this.ask = 0;
-		this.last = 0;
-		this.prvClose = 0;
+		this.bid = -1;
+		this.ask = -1;
+		this.last = -1;
+		this.prvClose = -1;	
 		
 	}
 	

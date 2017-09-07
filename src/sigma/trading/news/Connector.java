@@ -4,22 +4,25 @@
 package sigma.trading.news;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 import com.ib.client.Contract;
 import com.ib.client.Execution;
-import com.ib.client.Order;
-import com.ib.client.TagValue;
 import sigma.trading.TwsConnector;
+import sigma.utils.Ticker;
+import sigma.utils.Trade;
 
 /**
+ * TwsConnector extension for multi-instrument news trading
+ * 
  * @author Peeter Meos
- * @version 0.1
+ * @version 0.2
  *
  */
 public class Connector extends TwsConnector {
 	
 	List<Ticker> prices;
+	List<Trade> trades;
 	
 	/**
 	 * Constructor just adds recordkeeping of ticker prices to twsConnector
@@ -27,39 +30,10 @@ public class Connector extends TwsConnector {
 	public Connector() {
 		super();
 		prices = new ArrayList<>();
+		trades = new ArrayList<>();
 	}
 	
-	/**
-	 * Places bracket order set to the market.
-	 *
-	 * @param i Instrument order ID
-	 * @param c Contract
-	 * @param o Order
-	 */
-	public void placeOrder(int i, Contract c, Order o) {
-		if (tws.isConnected()) {
-			tws.placeOrder(i, c, o);
-		} else {
-			logger.error("Cannot place order, not connected to TWS.");
-		}
-	}
-	
-	/**
-	 * Request market data for given contract.
-	 * @param c
-	 */
-	public void reqMktData(Contract c) {
-		Vector<TagValue> mktDataOptions = new Vector<>();
-		
-		if (tws.isConnected()) {
-			String genericTickList = null;
-			
-			tws.reqMktData(nextOrderID, c, genericTickList, false, mktDataOptions);
-		} else {
-			logger.error("Cannot request data, not connected to TWS.");
-		}	
-	}
-	
+
 	/**
 	 * Returns connection status
 	 * @return connection status
@@ -74,6 +48,14 @@ public class Connector extends TwsConnector {
 	 */
 	public List<Ticker> getPrices() {
 		return(prices);
+	}
+	
+	/**
+	 * Returns list of trades
+	 * @return
+	 */
+	public List<Trade> getTrades() {
+		return(trades);
 	}
 	
 	/**
@@ -116,14 +98,17 @@ public class Connector extends TwsConnector {
 			
 			// Try to update existing ticker data
 			for (int i = 0; i < prices.size(); i++) {
+				logger.verbose("Checking ticker " + prices.get(i).getId());
 				if(prices.get(i).getId() == tickerId) {
 					found = true;
+					logger.verbose("Updating ticker " + prices.get(i).getId());
 					prices.get(i).setPrice(price);
 				}
 			}
 			
 			// If not found add new ticker
 			if (!found) {
+				logger.verbose("Adding new ticker");
 				prices.add(new Ticker(tickerId, price));
 			}
 			break;
@@ -141,6 +126,10 @@ public class Connector extends TwsConnector {
 	 */
 	@Override
     public void execDetails(int reqId, Contract contract, Execution execution) {
+		
+		logger.log("New execution for " + contract.symbol());	
+
+		trades.add(new Trade(contract.symbol(), execution.cumQty(), execution.price(), new Date()));
 		
 		// If the order was regular stop limit (entry)
 		//if ((execution.orderId() == oID) || (execution.orderId() == oID + 1)) {

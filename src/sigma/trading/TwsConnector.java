@@ -1,6 +1,7 @@
 package sigma.trading;
 
 import java.util.Set;
+import java.util.Vector;
 
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
@@ -13,6 +14,7 @@ import com.ib.client.EWrapper;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
+import com.ib.client.TagValue;
 
 import sigma.utils.Helper;
 import sigma.utils.LogLevel;
@@ -25,7 +27,9 @@ import sigma.utils.Logger;
  *
  */
 public class TwsConnector implements EWrapper {
-
+	// Safety switch
+	protected boolean simulated; 
+	
 	// TWS internals
 	protected EJavaSignal m_signal = new EJavaSignal();
 	protected EReader m_reader;
@@ -57,12 +61,7 @@ public class TwsConnector implements EWrapper {
      * the logger.
      */
 	public TwsConnector() {
-		myName = "TWS Connector";
-		
-		logger = new Logger(LogLevel.INFO);
-		logger.log(myName + " init.");
-		
-			tws = new EClientSocket(this, m_signal);
+		this("TWS Connector");
 	}
 	
 	/**
@@ -75,6 +74,9 @@ public class TwsConnector implements EWrapper {
 		logger.log(myName + " init.");
 		
 		tws = new EClientSocket(this, m_signal);
+		
+		// For safety
+		simulated = true;
 	}
 	
 	/**
@@ -83,8 +85,8 @@ public class TwsConnector implements EWrapper {
 	 * @param port port for TWS or IB Gateway
 	 */
 	public void twsConnect(String host, int port) {
-	    tws.eConnect(host, port, 55);
-	    
+	    tws.eConnect(host, port, (int) (Math.round((Math.random() * 100))));
+
 	    while (! tws.isConnected())
 			Helper.sleep(500);
 	    
@@ -149,6 +151,83 @@ public class TwsConnector implements EWrapper {
 	      error(e);
 	    }
 	}
+	
+	/**
+	 * 
+	 * @return next order ID
+	 */
+	public int getOrderID() {
+		return(nextOrderID);
+	}
+	
+	/**
+	 * Sets simulation mode of the connector.
+	 * @param sim
+	 */
+	public void setSimulated(boolean sim) {
+		if (sim) {
+			logger.log("All trades are SIMULATED");
+		} else {
+			logger.log("All trades are LIVE");
+		}
+		simulated = sim;
+	}
+	
+	/**
+	 * 
+	 * @return simulated
+	 */
+	public boolean getSimulated() {
+		return(simulated);
+	}
+	
+	/**
+	 * Places bracket order set to the market.
+	 *
+	 * @param i Instrument order ID
+	 * @param c Contract
+	 * @param o Order
+	 */
+	public void placeOrder(int i, Contract c, Order o) {
+		if (tws.isConnected()) {
+			if (getSimulated()) {
+				logger.log("Placing simulated order for " + c.symbol());
+			} else {
+				tws.placeOrder(i, c, o);
+			}
+		} else {
+			logger.error("Cannot place order, not connected to TWS.");
+		}
+	}
+	
+	/**
+	 * Request market data for given contract.
+	 * @param c
+	 */
+	public void reqMktData(int id, Contract c) {
+		Vector<TagValue> mktDataOptions = new Vector<>();
+		
+		if (tws.isConnected()) {
+			String genericTickList = null;
+			
+			//tws.reqMktData(nextOrderID, c, genericTickList, false, mktDataOptions);
+			tws.reqMktData(id, c, genericTickList, false, mktDataOptions);
+		} else {
+			logger.error("Cannot request data, not connected to TWS.");
+		}	
+	}
+	
+	/**
+	 * Request next valid Order id
+	 */
+	public void reqId() {
+		if (tws.isConnected()) {
+			tws.reqIds(1);
+		} else {
+			logger.error("Cannot request order ID, not connected to TWS.");
+		}
+			
+	}
     
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
@@ -211,7 +290,7 @@ public class TwsConnector implements EWrapper {
 
 	@Override
 	public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
-		logger.log("Order " + orderId + " contract" + contract.symbol() + 
+		logger.log("Order " + orderId + " contract " + contract.symbol() + 
 				" order " + order.action() + order.orderType().toString() +
 				" state " + orderState.toString());	
 	}
