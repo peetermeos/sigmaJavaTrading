@@ -4,10 +4,7 @@
 package sigma.trading.news;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import com.ib.client.Contract;
-import com.ib.client.Execution;
 import sigma.trading.TwsConnector;
 import sigma.utils.LogLevel;
 import sigma.utils.Ticker;
@@ -28,7 +25,7 @@ public class Connector extends TwsConnector {
 	public List<Trade> trades;
 	
 	/**
-	 * Constructor just adds recordkeeping of ticker prices to twsConnector
+	 * Constructor just adds record keeping of ticker prices to twsConnector
 	 */
 	public Connector() {
 		super("Sigma News Trader", LogLevel.INFO);

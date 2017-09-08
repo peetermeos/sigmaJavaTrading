@@ -13,7 +13,6 @@ import com.ib.client.Types.SecType;
 
 import sigma.trading.Instrument;
 import sigma.utils.Helper;
-import sigma.utils.Logger;
 import sigma.utils.OptSide;
 import sigma.utils.TraderState;
 
