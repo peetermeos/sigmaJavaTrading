@@ -7,6 +7,8 @@ package sigma.trading.news;
 
 import java.io.IOException;
 
+import sigma.utils.TraderState;
+
 /**
  * Trader class for news trading
  * 
@@ -36,11 +38,20 @@ public class Trader extends Connector {
 				
 				// Get last prices, adjust prices if needed
 				for(NewsInstrument item: instList) {
-					diff = getPrice(item.getID()) - item.getLast();
-					logger.verbose("Diff  for " + item.getSymbol() + " is " + diff);
-					if (Math.abs(diff) > item.getAdjLimit() ) {
-						// Adjust orders
-						item.adjustOrders(this);
+					// Create new order if there are none
+					if (item.getState() == TraderState.WAIT) {
+						logger.log("Creating order for " + item.getSymbol());
+						item.createOrders(this);
+					}
+					
+					// Check whether order needs to be adjusted
+					if (item.getState() == TraderState.LIVE) {
+						diff = getPrice(item.getID()) - item.getLast();
+						logger.verbose("Diff  for " + item.getSymbol() + " is " + diff);
+						if (Math.abs(diff) > item.getAdjLimit() ) {
+							// Adjust orders
+							item.adjustOrders(this);
+						}
 					}
 				}
 
@@ -66,7 +77,7 @@ public class Trader extends Connector {
 		
 		// Connect
 		trader.twsConnect();
-		trader.setSimulated(false);
+		trader.setSimulated(true);
 		
 		// Instrument add CL
 		trader.log("Adding CL");
@@ -74,7 +85,7 @@ public class Trader extends Connector {
 		
 		// Instrument add E7
 		trader.log("Adding EURO");
-		trader.instList.add(new NewsInstrument("E7", "FUT", "GLOBEX", "201712", 1, 0.0005, 0.0003, 0.0002));
+		trader.instList.add(new NewsInstrument("E7", "FUT", "GLOBEX", "201712", 1, 0.0010, 0.0005, 0.0002));
 
 		// Create and submit orders
 		for(NewsInstrument item: trader.instList) {
@@ -86,7 +97,7 @@ public class Trader extends Connector {
 		trader.trade();
 		
 		// Disconnect
-		trader.twsDisconnect();
+		trader.disconnect();
 	}
 
 }

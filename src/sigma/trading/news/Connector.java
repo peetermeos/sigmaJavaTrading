@@ -46,6 +46,28 @@ public class Connector extends TwsConnector {
 	}
 	
 	/**
+	 * Cancel all orders and disconnect
+	 */
+	public void disconnect() {
+		// TODO cancel all orders
+		
+		for(int i=0; i < instList.size(); i++) {
+			if (instList.get(i).getState().equals(TraderState.LIVE)) {
+				this.tws.cancelOrder(instList.get(i).getLongStop().orderId());	
+				this.tws.cancelOrder(instList.get(i).getShortStop().orderId());
+			}
+			if (instList.get(i).getState().equals(TraderState.EXEC)) {
+				this.tws.cancelOrder(instList.get(i).getLongTrail().orderId());
+				this.tws.cancelOrder(instList.get(i).getShortTrail().orderId());				
+			}
+			
+			
+		}
+		
+		twsDisconnect();
+	}
+	
+	/**
 	 * 
 	 * @return
 	 */
