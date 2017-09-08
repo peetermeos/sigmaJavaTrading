@@ -6,11 +6,15 @@
 package sigma.trading.news;
 
 import java.io.IOException;
-
 import sigma.utils.TraderState;
 
 /**
- * Trader class for news trading
+ * Trader class for news trading.
+ * Extends Connector class and adds main trading loop that essentially does two things:
+ * 1) Checks whether live orders need to be adjusted to the market
+ * 2) If set of orders have fully executed, enters a new set of orders 
+ * 
+ * The trading system can be used for arbitrary number of instruments in parallel.
  * 
  * @author Peeter Meos
  * @version 0.2
@@ -65,9 +69,10 @@ public class Trader extends Connector {
 	}
 	
 	/**
-	 * Main entry point for news trader algorithm
+	 * Main entry point for news trader algorithm.
+	 * Command line arguments are currently not used.
 	 * 
-	 * @param args
+	 * @param args Command line arguments for the News Trader
 	 */
 	public static void main(String[] args) {
         Trader trader;
@@ -77,15 +82,15 @@ public class Trader extends Connector {
 		
 		// Connect
 		trader.twsConnect();
-		trader.setSimulated(false);
+		trader.setSimulated(true);
 		
 		// Instrument add CL
 		trader.log("Adding CL");
-		trader.instList.add(new NewsInstrument("CL", "FUT", "NYMEX",  "201710", 1, 0.1, 0.05, 0.05));
+		trader.instList.add(new NewsInstrument("CL", "FUT", "NYMEX",  "201710", 1, 0.1, 0.05, 0, 0.05));
 		
 		// Instrument add E7
 		trader.log("Adding EURO");
-		trader.instList.add(new NewsInstrument("E7", "FUT", "GLOBEX", "201712", 1, 0.0010, 0.0005, 0.0002));
+		trader.instList.add(new NewsInstrument("E7", "FUT", "GLOBEX", "201712", 1, 0.0010, 0.0005, 0, 0.0002));
 
 		// Create and submit orders
 		for(NewsInstrument item: trader.instList) {

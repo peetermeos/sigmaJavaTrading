@@ -34,11 +34,14 @@ public class NewsInstrument extends Instrument {
     protected Order shortStop;
     protected Order longTrail;
     protected Order shortTrail;
+    protected Order longTarget;
+    protected Order shortTarget;
     
     // Prices and parameters
     protected double delta = 0;
     protected double adjLimit = 0.02;
     protected double trailAmt = 0;
+    protected double target = 0;
     protected double q = 0;
     
     protected int oid = 0;
@@ -46,17 +49,18 @@ public class NewsInstrument extends Instrument {
     /**
      * Constructor for news trader instrument class.
      * 
-     * @param m_symbol
-     * @param m_secType
-     * @param m_exchange
-     * @param m_expiry
-     * @param q
-     * @param delta
-     * @param trailAmt
-     * @param adjLimit
+     * @param m_symbol Symbol string 
+     * @param m_secType Security type string
+     * @param m_exchange Exchange string
+     * @param m_expiry Expiry date string
+     * @param q Order quantity integer
+     * @param delta Delta between trigger price and last price double
+     * @param trailAmt Trailing amount for trail order double
+     * @param target Profit taker target double
+     * @param adjLimit Limit when order will be moved to match the market double
      */
     public NewsInstrument(String m_symbol, String m_secType, String m_exchange, String m_expiry,
-    				  int q, double delta, double trailAmt, double adjLimit) {
+    				  int q, double delta, double trailAmt, double target, double adjLimit) {
     	super(m_symbol, m_secType, m_exchange, m_expiry);
     	
     	// Initialise trading parameters
@@ -64,6 +68,7 @@ public class NewsInstrument extends Instrument {
     	this.delta = delta;
     	this.trailAmt = trailAmt;
     	this.adjLimit = adjLimit;
+    	this.target = target;
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
@@ -93,38 +98,40 @@ public class NewsInstrument extends Instrument {
     /**
      * Constructor for news trader instrument class.
      * 
-     * @param iD
-     * @param m_symbol
-     * @param m_secType
-     * @param m_exchange
-     * @param m_expiry
-     * @param q
-     * @param delta
-     * @param trailAmt
-     * @param adjLimit
+     * @param iD Instrument id integer
+     * @param m_symbol Symbol string 
+     * @param m_secType Security type string
+     * @param m_exchange Exchange string
+     * @param m_expiry Expiry date string
+     * @param q Order quantity integer
+     * @param delta Delta between trigger price and last price double
+     * @param trailAmt Trailing amount for trail order double
+     * @param target Profit taker target double
+     * @param adjLimit Limit when order will be moved to match the market double
      */
     public NewsInstrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry,
-    		int q, double delta, double trailAmt, double adjLimit) {
-    	this(m_symbol, m_secType, m_exchange, m_expiry, q, delta, trailAmt, adjLimit);
+    		int q, double delta, double trailAmt, double target, double adjLimit) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, q, delta, trailAmt, target, adjLimit);
     	this.id = iD;  	
     } 
     
     /**
      * Constructor for news trader instrument class.
      * 
-     * @param m_symbol
-     * @param m_secType
-     * @param m_exchange
-     * @param m_expiry
-     * @param m_strike
-     * @param m_side
-     * @param q
-     * @param delta
-     * @param trailAmt
-     * @param adjLimit
+     * @param m_symbol Symbol string 
+     * @param m_secType Security type string
+     * @param m_exchange Exchange string
+     * @param m_expiry Expiry date string
+     * @param m_strike Option strike double
+     * @param m_side Option side OptSide
+     * @param q Order quantity integer
+     * @param delta Delta between trigger price and last price double
+     * @param trailAmt Trailing amount for trail order double
+     * @param target Profit taker target double
+     * @param adjLimit Limit when order will be moved to match the market double
      */
     public NewsInstrument(String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
-    		int q, double delta, double trailAmt, double adjLimit) {
+    		int q, double delta, double trailAmt, double target, double adjLimit) {
     	super(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side);
     
     	// Initialise trading parameters
@@ -132,6 +139,7 @@ public class NewsInstrument extends Instrument {
     	this.delta = delta;
     	this.trailAmt = trailAmt;
     	this.adjLimit = adjLimit;
+    	this.target = target;
     	
     	inst = new Contract();
     	inst.symbol(m_symbol);
@@ -161,21 +169,22 @@ public class NewsInstrument extends Instrument {
     /**
      * Constructor for news trader instrument class.
      * 
-     * @param iD
-     * @param m_symbol
-     * @param m_secType
-     * @param m_exchange
-     * @param m_expiry
-     * @param m_strike
-     * @param m_side
-     * @param q
-     * @param delta
-     * @param trailAmt 
-     * @param adjLimit
+     * @param iD Instrument id integer
+     * @param m_symbol Symbol string 
+     * @param m_secType Security type string
+     * @param m_exchange Exchange string
+     * @param m_expiry Expiry date string
+     * @param m_strike Option strike double
+     * @param m_side Option side OptSide
+     * @param q Order quantity integer
+     * @param delta Delta between trigger price and last price double
+     * @param trailAmt Trailing amount for trail order double
+     * @param target Profit taker target double
+     * @param adjLimit Limit when order will be moved to match the market double
      */
     public NewsInstrument(int iD, String m_symbol, String m_secType, String m_exchange, String m_expiry, Double m_strike, OptSide m_side,
-    		int q, double delta, double trailAmt, double adjLimit) {
-    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side, q, delta, trailAmt, adjLimit);
+    		int q, double delta, double trailAmt, double target, double adjLimit) {
+    	this(m_symbol, m_secType, m_exchange, m_expiry, m_strike, m_side, q, delta, trailAmt, target, adjLimit);
     	this.id = iD;
     }
     
@@ -213,6 +222,8 @@ public class NewsInstrument extends Instrument {
     	shortStop = new Order();
     	longTrail = new Order();
     	shortTrail = new Order();
+    	longTarget = new Order();
+    	shortTarget = new Order();
     	
     	// Update order details
     	longStop.action(Action.BUY);
@@ -232,6 +243,26 @@ public class NewsInstrument extends Instrument {
     	shortStop.outsideRth(true);
     	shortStop.transmit(false);
     	shortStop.orderId((int) (oid + 1));
+
+    	if (target > 0) {
+	    	longTarget.action(Action.SELL);
+	    	longTarget.orderType(OrderType.LMT);
+	    	longTarget.totalQuantity(q);
+	    	longTarget.lmtPrice(last + target);
+	    	longTarget.parentId(longStop.orderId());
+	    	longTarget.outsideRth(true);
+	    	longTarget.transmit(false);
+	    	longTarget.orderId((int) (oid + 4));
+	    	
+	    	shortTarget.action(Action.BUY);
+	    	shortTarget.orderType(OrderType.LMT);
+	    	shortTarget.totalQuantity(q);
+	    	shortTarget.lmtPrice(last - target);
+	    	shortTarget.parentId(shortStop.orderId());
+	    	shortTarget.outsideRth(true);
+	    	shortTarget.transmit(false);
+	    	shortTarget.orderId((int) (oid + 5));
+    	}
     	
     	longTrail.action(Action.SELL);
     	longTrail.orderType(OrderType.TRAIL_LIMIT);
@@ -258,16 +289,31 @@ public class NewsInstrument extends Instrument {
     	
     	longStop.ocaGroup("News" + inst.symbol() + ocaNum);
 		shortStop.ocaGroup("News" + inst.symbol() + ocaNum);
+		
+		if (target > 0) {
+	    	longTarget.ocaGroup("News" + inst.symbol() + ocaNum + 1);
+			longTrail.ocaGroup("News" + inst.symbol() + ocaNum + 1);
+			
+	    	shortTarget.ocaGroup("News" + inst.symbol() + ocaNum + 2);
+			shortTrail.ocaGroup("News" + inst.symbol() + ocaNum + 2);
+		}
     	
     	// Submit orders to TWS
     	con.placeOrder((int) (oid + 0), inst, longStop);
     	con.placeOrder((int) (oid + 1), inst, shortStop);
+    	
+    	if (target > 0) {
+        	con.placeOrder((int) (oid + 4), inst, longTarget);
+        	con.placeOrder((int) (oid + 5), inst, shortTarget);    		
+    	}
+    	
     	con.placeOrder((int) (oid + 2), inst, longTrail);
     	con.placeOrder((int) (oid + 3), inst, shortTrail);
     	
     	// Change state
     	state = TraderState.LIVE;
     }
+       
     
     /**
      * Adjust order set to the market
@@ -310,19 +356,31 @@ public class NewsInstrument extends Instrument {
     		shortTrail.trailStopPrice(last);
         	shortTrail.outsideRth(true);
         	shortTrail.transmit(true);
+        	
+        	if (target > 0 ) {
+        		longTarget.lmtPrice(last + target);
+        		shortTarget.lmtPrice(last + target);
+        		longTarget.transmit(true);
+        		longTarget.transmit(true);
+        	}
     		
         	// Submit orders to TWS
         	con.placeOrder((int) (oid + 0), inst, longStop);
         	con.placeOrder((int) (oid + 1), inst, shortStop);
         	con.placeOrder((int) (oid + 2), inst, longTrail);
         	con.placeOrder((int) (oid + 3), inst, shortTrail);
+        	
+        	if (target > 0 ) {
+            	con.placeOrder((int) (oid + 4), inst, longTarget);
+            	con.placeOrder((int) (oid + 5), inst, shortTarget);
+        	}
     	}    	
     }
     
     /**
      * Processes trades, checks executions adjusts system state accordingly
      * 
-     * @param con
+     * @param con Connector for TWS API
      */
     public void processTrades(Connector con) {
     	// TODO not implemented
@@ -365,7 +423,8 @@ public class NewsInstrument extends Instrument {
 		this.trailAmt = trailAmt;
 	}
 	/**
-	 * @return the q
+	 * Returns order quantity
+	 * @return  q double
 	 */
 	public double getQ() {
 		return q;
@@ -375,6 +434,22 @@ public class NewsInstrument extends Instrument {
 	 */
 	public void setQ(double q) {
 		this.q = q;
+	}
+	
+	/**
+	 * Returns target amount
+	 * @return target double
+	 */
+	public double getTarget() {
+		return(this.target);
+	}
+	
+	/**
+	 * Sets profit target value
+	 * @param tgt Profit target
+	 */
+	public void setTarget(double tgt) {
+		this.target = tgt;
 	}
 	
 	/**
@@ -394,35 +469,51 @@ public class NewsInstrument extends Instrument {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns longStop order
+	 * @return Order longStop
 	 */
 	public Order getLongStop() {
 		return(longStop);
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns shortStop order
+	 * @return Order shortStop
 	 */
 	public Order getShortStop() {
 		return(shortStop);
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns longTrail order
+	 * @return Order longTrail
 	 */
 	public Order getLongTrail() {
 		return(longTrail);
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns shortTrail order
+	 * @return Order shortTrail
 	 */
 	public Order getShortTrail() {
 		return(shortTrail);
+	}
+	
+	/**
+	 * Returns longTarget order
+	 * @return Order longTrail
+	 */
+	public Order getLongTarget() {
+		return(longTarget);
+	}
+	
+	/**
+	 * Returns shortTarget order
+	 * @return Order shortTarget
+	 */
+	public Order getShortTarget() {
+		return(shortTarget);
 	}
 
 }

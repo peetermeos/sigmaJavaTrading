@@ -67,24 +67,24 @@ public class Connector extends TwsConnector {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns list of instruments traded
+	 * @return Instrument list 
 	 */
 	public List<NewsInstrument> getInst() {
 		return(instList);
 	}
 	
 	/**
-	 * Returns prices list
-	 * @return
+	 * Returns prices list for tickers traded
+	 * @return list of price Tickers 
 	 */
 	public List<Ticker> getPrices() {
 		return(prices);
 	}
 	
 	/**
-	 * Returns list of trades
-	 * @return
+	 * Returns list of trades completed
+	 * @return list of Trades
 	 */
 	public List<Trade> getTrades() {
 		return(trades);

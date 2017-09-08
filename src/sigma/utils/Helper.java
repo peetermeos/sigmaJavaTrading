@@ -12,7 +12,7 @@ public class Helper {
 	/** 
 	 * Sleep for given number of milliseconds
 	 * 
-	 * @param msec
+	 * @param msec Milliseconds to wait
 	 */
 	public static void sleep(int msec) {
 		try {
