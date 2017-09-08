@@ -156,34 +156,36 @@ public class Connector extends TwsConnector {
 			
 	}
 	
+
 	/**
-	 * Overriden to change trader status, when order executes
+	 * Order status change
 	 */
 	@Override
-    public void execDetails(int reqId, Contract contract, Execution execution) {
+	public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice,
+			int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+		logger.log("Order " + orderId + " status " + status +
+				" filled " + filled + " remaining " + remaining +
+				" avgFillPrice " + avgFillPrice);
 		
-		logger.log("New execution for " + contract.symbol());	
-
-		trades.add(new Trade(contract.symbol(), execution.cumQty(), execution.price(), execution.side(), new Date()));
-		
-		for(int i = 0; i < instList.size(); i++  ) {
-			if (contract.symbol().equals(instList.get(i).getSymbol())) {
+		if (status.equals("Filled")) {
+			for(int i = 0; i < instList.size(); i++  ) {
 				
-				// Entry has fired
-				if (reqId == instList.get(i).getLongStop().orderId() || reqId == instList.get(i).getShortStop().orderId()) {
-					logger.log("Entry for " + contract.symbol());
-					instList.get(i).setState(TraderState.EXEC);	
+				if((instList.get(i).getState() == TraderState.LIVE) &&
+					   (orderId == instList.get(i).getLongStop().orderId() ||
+						orderId == instList.get(i).getShortStop().orderId())) {
+					logger.log("Entry for " + instList.get(i).getSymbol());
+					instList.get(i).setState(TraderState.EXEC);						
 				}
 				
-				// Exit has fired
-				if (reqId == instList.get(i).getLongTrail().orderId() || reqId == instList.get(i).getShortTrail().orderId()) {
-					logger.log("Exit for " + contract.symbol());
-					instList.get(i).setState(TraderState.WAIT);	
+				if((instList.get(i).getState() == TraderState.EXEC) && 
+					(orderId == instList.get(i).getLongTrail().orderId() ||
+				     orderId == instList.get(i).getShortTrail().orderId())) {
+					logger.log("Exit for " + instList.get(i).getSymbol());
+					instList.get(i).setState(TraderState.WAIT);						
 				}
 
 			}
 		}
-		
 	}
 
 }

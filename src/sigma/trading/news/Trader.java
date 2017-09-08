@@ -34,7 +34,7 @@ public class Trader extends Connector {
 		try {
 			// Infinite loop until keypress
 			while (System.in.available() == 0) {
-				Thread.sleep(10);
+				Thread.sleep(1000);
 				
 				// Get last prices, adjust prices if needed
 				for(NewsInstrument item: instList) {
@@ -77,11 +77,11 @@ public class Trader extends Connector {
 		
 		// Connect
 		trader.twsConnect();
-		trader.setSimulated(true);
+		trader.setSimulated(false);
 		
 		// Instrument add CL
 		trader.log("Adding CL");
-		trader.instList.add(new NewsInstrument("CL", "FUT", "NYMEX",  "201710", 1, 0.1, 0.15, 0.05));
+		trader.instList.add(new NewsInstrument("CL", "FUT", "NYMEX",  "201710", 1, 0.1, 0.05, 0.05));
 		
 		// Instrument add E7
 		trader.log("Adding EURO");

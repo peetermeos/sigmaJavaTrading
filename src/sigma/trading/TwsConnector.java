@@ -372,7 +372,7 @@ public class TwsConnector implements EWrapper {
 
 	@Override
 	public void execDetails(int reqId, Contract contract, Execution execution) {
-		logger.log("Exec details req: " + reqId + " contract " + 
+		logger.verbose("Exec details req: " + reqId + " contract " + 
 				contract.toString() + " execution " + execution.toString());
 	}
 
