@@ -10,22 +10,22 @@ import com.ib.client.Contract;
  *
  */
 public class Instrument {
-	private String symbol;
-	private String secType;
-	private String ulType;
-	private String exchange;
-	private String expiry;
-	private Double strike;
-	private OptSide side;
+	protected String symbol;
+	protected String secType;
+	protected String ulType;
+	protected String exchange;
+	protected String expiry;
+	protected Double strike;
+	protected OptSide side;
 	
 	protected Contract inst;
-	private Contract ul;
+	protected Contract ul;
 	
 	protected double bid = -1;
 	protected double ask = -1;
 	protected double last = -1;
 	
-	private double prvClose;
+	protected double prvClose;
 	
 	protected int id;
 	

@@ -11,6 +11,7 @@ import com.ib.client.Execution;
 import sigma.trading.TwsConnector;
 import sigma.utils.Ticker;
 import sigma.utils.Trade;
+import sigma.utils.TraderState;
 
 /**
  * TwsConnector extension for multi-instrument news trading
@@ -21,25 +22,34 @@ import sigma.utils.Trade;
  */
 public class Connector extends TwsConnector {
 	
-	List<Ticker> prices;
-	List<Trade> trades;
+	public List<NewsInstrument> instList;
+	public List<Ticker> prices;
+	public List<Trade> trades;
 	
 	/**
 	 * Constructor just adds recordkeeping of ticker prices to twsConnector
 	 */
 	public Connector() {
 		super();
+		instList = new ArrayList<>();
 		prices = new ArrayList<>();
 		trades = new ArrayList<>();
 	}
 	
-
 	/**
 	 * Returns connection status
 	 * @return connection status
 	 */
 	public boolean isConnected() {
 		return tws.isConnected();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public List<NewsInstrument> getInst() {
+		return(instList);
 	}
 	
 	/**
@@ -134,23 +144,24 @@ public class Connector extends TwsConnector {
 
 		trades.add(new Trade(contract.symbol(), execution.cumQty(), execution.price(), execution.side(), new Date()));
 		
-		// If the order was regular stop limit (entry)
-		//if ((execution.orderId() == oID) || (execution.orderId() == oID + 1)) {
-			// Stop has fired
-		//	logger.log("Entry order " + reqId + " for " + contract.symbol() + " has executed");
-			//this.state = TraderState.EXEC;
-			// Here we should run a check that order on the other side got cancelled and only the trail 
-			// is active
+		for(int i = 0; i < instList.size(); i++  ) {
+			if (contract.symbol().equals(instList.get(i).getSymbol())) {
+				
+				// Entry has fired
+				if (reqId == instList.get(i).getLongStop().orderId() || reqId == instList.get(i).getShortStop().orderId()) {
+					logger.log("Entry for " + contract.symbol());
+					instList.get(i).setState(TraderState.EXEC);	
+				}
+				
+				// Exit has fired
+				if (reqId == instList.get(i).getLongTrail().orderId() || reqId == instList.get(i).getShortTrail().orderId()) {
+					logger.log("Exit for " + contract.symbol());
+					instList.get(i).setState(TraderState.WAIT);	
+				}
 
-		//}
+			}
+		}
 		
-		// If the order was trail stop (exit)
-		//if ((execution.orderId() == oID + 2) || (execution.orderId() == oID + 3)) {
-			// Stop has fired
-		//	logger.log("Exit order " + reqId + " for " + contract.symbol() + " has executed");
-			//this.state = TraderState.WAIT;
-			// Here we should check that we have no active orders
-		//}
 	}
 
 }

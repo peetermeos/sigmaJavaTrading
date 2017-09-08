@@ -6,9 +6,6 @@
 package sigma.trading.news;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import sigma.utils.Logger;
 
 /**
  * Trader class for news trading
@@ -17,31 +14,7 @@ import sigma.utils.Logger;
  * @version 0.1
  *
  */
-public class Trader {
-	
-	public List<NewsInstrument> instList;
-	
-	protected Logger logger; 
-	protected Connector con;
-	
-	/**
-	 * Simple constructor for news trader.
-	 */
-	public Trader() {
-		logger = new Logger();
-		logger.log("Sigma News Trader init");
-		
-		instList = new ArrayList<>();
-		con = new Connector();
-	}
-	
-	/**
-	 * Connect trading system
-	 */
-	public void connect() {
-		logger.log("Connecting to TWS");
-		con.twsConnect();
-	}
+public class Trader extends Connector{
 	
 	/**
 	 * The main trading loop
@@ -50,7 +23,7 @@ public class Trader {
 		
 		double diff = 0;
 	
-		if (!con.isConnected()) {
+		if (!isConnected()) {
 			logger.error("doTrading(): Not connected to TWS.");
 			return;
 		}
@@ -63,15 +36,15 @@ public class Trader {
 				
 				// Get last prices, adjust prices if needed
 				for(NewsInstrument item: instList) {
-					diff = con.getPrice(item.getID()) - item.getLast();
+					diff = getPrice(item.getID()) - item.getLast();
 					logger.verbose("Diff  for " + item.getSymbol() + " is " + diff);
 					if (Math.abs(diff) > item.getAdjLimit() ) {
 						// Adjust orders
-						item.adjustOrders(con);
+						item.adjustOrders(this);
 					}
 					
 					// Check for executions
-					item.processTrades(con);
+					item.processTrades(this);
 				}
 
 				// Here check key presses to arm/disarm/quit trader
@@ -84,23 +57,6 @@ public class Trader {
 	}
 	
 	/**
-	 * Disconnect and shut down trading system
-	 */
-	public void disconnect() {
-		logger.log("Closing TWS connection");
-		con.twsDisconnect();
-		logger.log("Shutting down news trader");
-	}
-	
-	/**
-	 * Logging wrapper
-	 * @param str
-	 */
-	public void log(String str) {
-		logger.log(str);
-	}
-
-	/**
 	 * Main entry point for news trader algorithm
 	 * 
 	 * @param args
@@ -112,8 +68,8 @@ public class Trader {
 		trader = new Trader();
 		
 		// Connect
-		trader.connect();
-		trader.con.setSimulated(true);
+		trader.twsConnect();
+		trader.setSimulated(true);
 		
 		// Instrument add CL
 		trader.log("Adding CL");
@@ -126,14 +82,14 @@ public class Trader {
 		// Create and submit orders
 		for(NewsInstrument item: trader.instList) {
 			trader.log("Creating order for " + item.getSymbol());
-			item.createOrders(trader.con);
+			item.createOrders(trader);
 		}
 		
 		// Trade
 		trader.trade();
 		
 		// Disconnect
-		trader.disconnect();
+		trader.twsDisconnect();
 	}
 
 }

@@ -30,18 +30,18 @@ public class NewsInstrument extends Instrument {
 	TraderState state;
 	
 	// Orders
-    private Order longStop;
-    private Order shortStop;
-    private Order longTrail;
-    private Order shortTrail;
+    protected Order longStop;
+    protected Order shortStop;
+    protected Order longTrail;
+    protected Order shortTrail;
     
     // Prices and parameters
-    private double delta = 0;
-    private double adjLimit = 0.02;
-    private double trailAmt = 0;
-    private double q = 0;
+    protected double delta = 0;
+    protected double adjLimit = 0.02;
+    protected double trailAmt = 0;
+    protected double q = 0;
     
-    private int oid = 0;
+    protected int oid = 0;
     
     /**
      * Constructor for news trader instrument class.
@@ -154,7 +154,6 @@ public class NewsInstrument extends Instrument {
     	inst.strike(m_strike);
     	inst.right(m_side.toString());
     	
-    	//id = (int) (Math.round(Math.random() * 1000));
     	id = new Random().nextInt(1000);
     	state = TraderState.WAIT;
     }
@@ -393,6 +392,38 @@ public class NewsInstrument extends Instrument {
 	 */
 	public void setState(TraderState s) {
 		this.state = s;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Order getLongStop() {
+		return(longStop);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Order getShortStop() {
+		return(shortStop);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Order getLongTrail() {
+		return(longTrail);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Order getShortTrail() {
+		return(shortTrail);
 	}
 
 }
