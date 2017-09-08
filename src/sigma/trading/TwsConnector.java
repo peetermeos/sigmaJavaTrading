@@ -31,12 +31,12 @@ public class TwsConnector implements EWrapper {
 	protected boolean simulated; 
 	
 	// TWS internals
-	protected EJavaSignal m_signal = new EJavaSignal();
+	protected EJavaSignal m_signal;
 	protected EReader m_reader;
 	protected EClientSocket tws;
     
 	protected int nextOrderID = 0;
-    protected String myName;
+    protected String myName = "Sigma Trader";
     
     // Threads
     protected Logger logger;
@@ -65,39 +65,66 @@ public class TwsConnector implements EWrapper {
 	}
 	
 	/**
+	 * Constructor for twsConnector
 	 * 
 	 * @param m_name
 	 */
 	public TwsConnector(String m_name) {
-		this.myName = m_name;
-		logger = new Logger(LogLevel.INFO);
+		this(m_name, "127.0.0.1", 4001, LogLevel.INFO);		
+	}
+	
+	/**
+	 * Constructor for twsConnector
+	 * 
+	 * @param m_name
+	 * @param ll
+	 */
+	public TwsConnector(String m_name, LogLevel ll) {
+		this(m_name, "127.0.0.1", 4001, ll);		
+	}
+	
+	/**
+	 * Constructor for twsConnector
+	 * 
+	 * @param m_name
+	 */
+	public TwsConnector(String m_name, String host, int port, LogLevel ll) {
+		logger = new Logger(ll);
 		logger.log(myName + " init.");
 		
-		tws = new EClientSocket(this, m_signal);
+		this.myName = m_name;	
 		
-		// For safety
-		simulated = true;
+		m_signal = new EJavaSignal();
+		tws = new EClientSocket(this, m_signal);
 	}
 	
 	/**
 	 * Connection method for TwsConnector
+	 * 
 	 * @param host host name for TWS or IB Gateway
 	 * @param port port for TWS or IB Gateway
 	 */
 	public void twsConnect(String host, int port) {
+
 	    tws.eConnect(host, port, (int) (Math.round((Math.random() * 100))));
 
-	    while (! tws.isConnected())
-			Helper.sleep(500);
+	    while (! tws.isConnected()) {
+	    	Helper.sleep(500);
+	    }
 	    
 	    logger.log("Connected");
 
+	    // Start reader thread
 	    m_reader = new EReader(tws, m_signal);
 	    m_reader.start();
 	    
+	    // Start message thread
 	    Task myTask = new Task();
 	    msgThread = new Thread(myTask, "T1");
-	    msgThread.start();	
+	    msgThread.start();
+	    
+		// For safety
+		simulated = true;
 	}
 	
 	/**

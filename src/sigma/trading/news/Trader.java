@@ -11,10 +11,10 @@ import java.io.IOException;
  * Trader class for news trading
  * 
  * @author Peeter Meos
- * @version 0.1
+ * @version 0.2
  *
  */
-public class Trader extends Connector{
+public class Trader extends Connector {
 	
 	/**
 	 * The main trading loop
@@ -42,9 +42,6 @@ public class Trader extends Connector{
 						// Adjust orders
 						item.adjustOrders(this);
 					}
-					
-					// Check for executions
-					item.processTrades(this);
 				}
 
 				// Here check key presses to arm/disarm/quit trader
@@ -69,7 +66,7 @@ public class Trader extends Connector{
 		
 		// Connect
 		trader.twsConnect();
-		trader.setSimulated(true);
+		trader.setSimulated(false);
 		
 		// Instrument add CL
 		trader.log("Adding CL");
