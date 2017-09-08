@@ -185,29 +185,28 @@ public class NewsInstrument extends Instrument {
      * @param con Connector to TWS
      */
     public void createOrders(Connector con) {
-    	Logger logger = new Logger();
-  	
-    	logger.log("Requesting instrument data for " + this.getSymbol());
+ 	
+    	con.log("Requesting instrument data for " + this.getSymbol());
     	// First request data for the instrument
     	con.reqMktData(this.getID(), inst);
     	
     	// Wait for the data to arrive
-    	logger.log("Waiting for data for " + this.getSymbol() + " with ticker id " + this.getID());
+    	con.log("Waiting for data for " + this.getSymbol() + " with ticker id " + this.getID());
     	while (con.getPrice(id) <= 0) {
     		Helper.sleep(10);
     	}
     	last = con.getPrice(id);
     	
-    	logger.log("Price for " + this.getSymbol() + " received: " + last);
+    	con.log("Price for " + this.getSymbol() + " received: " + last);
     	    	
     	// Update order ID
     	oid = con.getOrderID();
     	con.reqId();
-    	logger.log("Waiting for next order id"); 	
+    	con.log("Waiting for next order id"); 	
    		Helper.sleep(10);
 
     	oid = con.getOrderID();
-    	logger.log("Order ID received");
+    	con.log("Order ID received");
     	
     	// Create orders
     	longStop = new Order();
@@ -278,8 +277,8 @@ public class NewsInstrument extends Instrument {
     public void adjustOrders(Connector con) {
     	// Check if price differs enough
     	double spot = -1;
-    	Logger logger = new Logger();
-    	logger.log("Adjusting price for " + getSymbol());
+
+    	con.log("Adjusting price for " + getSymbol());
     	
     	// Find last price
     	for (int i=0;i < con.prices.size(); i++) {
