@@ -30,4 +30,17 @@ public enum TraderState {
 			return("NONE");
 		}
 	}
+	
+	/**
+	 * Simple standard comparison method
+	 * @param t
+	 * @return
+	 */
+	public boolean equals(TraderState t) {
+		if (this == t) {
+			return(true);
+		} else {
+			return(false);
+		}
+	}
 }

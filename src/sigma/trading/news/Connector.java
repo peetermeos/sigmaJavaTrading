@@ -49,19 +49,18 @@ public class Connector extends TwsConnector {
 	 * Cancel all orders and disconnect
 	 */
 	public void disconnect() {
-		// TODO cancel all orders
-		
+	
 		for(int i=0; i < instList.size(); i++) {
+			// If item is live cancel stops, trails cancel automatically
 			if (instList.get(i).getState().equals(TraderState.LIVE)) {
 				this.tws.cancelOrder(instList.get(i).getLongStop().orderId());	
 				this.tws.cancelOrder(instList.get(i).getShortStop().orderId());
 			}
+			// If item is exec, only trails need to be cancelled
 			if (instList.get(i).getState().equals(TraderState.EXEC)) {
 				this.tws.cancelOrder(instList.get(i).getLongTrail().orderId());
 				this.tws.cancelOrder(instList.get(i).getShortTrail().orderId());				
-			}
-			
-			
+			}			
 		}
 		
 		twsDisconnect();
