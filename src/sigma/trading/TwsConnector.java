@@ -69,8 +69,8 @@ public class TwsConnector implements EWrapper {
 	 * 
 	 * @param m_name
 	 */
-	public TwsConnector(String m_name) {
-		this(m_name, "127.0.0.1", 4001, LogLevel.INFO);		
+	public TwsConnector(String name) {
+		this(name, LogLevel.INFO);		
 	}
 	
 	/**
@@ -79,8 +79,8 @@ public class TwsConnector implements EWrapper {
 	 * @param m_name
 	 * @param ll
 	 */
-	public TwsConnector(String m_name, LogLevel ll) {
-		this(m_name, "127.0.0.1", 4001, ll);		
+	public TwsConnector(String name, LogLevel ll) {
+		this(name, ll, null);		
 	}
 	
 	/**
@@ -88,11 +88,11 @@ public class TwsConnector implements EWrapper {
 	 * 
 	 * @param m_name
 	 */
-	public TwsConnector(String m_name, String host, int port, LogLevel ll) {
-		logger = new Logger(ll);
+	public TwsConnector(String name, LogLevel ll, String fname) {
+		logger = new Logger(fname, ll);
 		logger.log(myName + " init.");
 		
-		this.myName = m_name;	
+		this.myName = name;	
 		
 		m_signal = new EJavaSignal();
 		tws = new EClientSocket(this, m_signal);
@@ -158,6 +158,9 @@ public class TwsConnector implements EWrapper {
 		tws.eDisconnect();
 		
 		m_reader = null;
+		
+		// Shut down the logger
+		logger.close();
 	}
 	
 	/**
@@ -256,6 +259,14 @@ public class TwsConnector implements EWrapper {
 			
 	}
     
+	/** 
+	 * Accessor for tws client
+	 * @return EClientSocket tws client
+	 */
+	public EClientSocket getTws() {
+		return(tws);
+	}
+	
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
 		String tckType = null;

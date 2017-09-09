@@ -5,6 +5,8 @@ package sigma.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.PrintStream;
+
 import javax.swing.*;
 
 import com.ib.client.Contract;
@@ -15,17 +17,18 @@ import java.util.Vector;
 import java.util.ArrayList;
 
 import sigma.trading.TwsConnector;
-import sigma.utils.OptSide;
+//import sigma.utils.OptSide;
 import sigma.trading.Instrument;
 
 
 /**
+ * Simple quote monitor for TWS
  * 
  * @author Peeter Meos
- * @version 0.1
+ * @version 0.2
  *
  */
-public class QuoteMonitor extends TwsConnector{
+public class QuoteMonitor extends TwsConnector {
 	private JFrame mainFrame;
 	private JLabel headerLabel;
 	private JLabel statusLabel;
@@ -35,6 +38,8 @@ public class QuoteMonitor extends TwsConnector{
 	private JScrollPane scrollPane;
 	
 	private List<Instrument> portfolio;
+	
+	private PrintStream printStream;
 	
 	String[] columnNames = {"Contract",
             "Bid", "Ask", "Last",
@@ -54,9 +59,10 @@ public class QuoteMonitor extends TwsConnector{
 	 */
 	public QuoteMonitor() {
 		super("Quote Monitor");
+		     
 		
-		// Initialise the portfolio
-		portfolio = new ArrayList<Instrument>();
+		// Initialize the portfolio
+		portfolio = new ArrayList<>();
 		portfolio.add(new Instrument("CL", "FUT", "NYMEX", "201710"));
 		portfolio.add(new Instrument("RB", "FUT", "NYMEX", "201710"));
 		portfolio.add(new Instrument("SVXY", "STK", "SMART", ""));
@@ -64,6 +70,11 @@ public class QuoteMonitor extends TwsConnector{
 		portfolio.add(new Instrument("JNUG", "STK", "SMART", ""));
 		
 		prepareGUI();
+		
+		// Wonder if the reassignment of logging works?
+        this.printStream = new PrintStream(new TextAreaOutputStream(logWindow));               
+        System.setOut(this.printStream);
+        System.setErr(this.printStream);
 	}
 	
 	/**
@@ -71,8 +82,8 @@ public class QuoteMonitor extends TwsConnector{
 	 */
 	public void prepareGUI() {
 	    mainFrame = new JFrame("Sigma Quote Monitor");
-	    mainFrame.setSize(800, 400);
-	    mainFrame.setLayout(new GridLayout(5, 1, 5, 5));
+	    mainFrame.setSize(800, 404);
+	    mainFrame.getContentPane().setLayout(new GridLayout(5, 1, 5, 5));
 
 	    headerLabel = new JLabel("Header",JLabel.CENTER );
 	    
@@ -94,8 +105,11 @@ public class QuoteMonitor extends TwsConnector{
 	        * 
 	        * @param windowEvent
 	        */
+	       @Override
 	       public void windowClosing(WindowEvent windowEvent){
-	    	   twsDisconnect();
+	    	   if(getTws().isConnected()) {
+	    		   twsDisconnect();   
+	    	   }
 	           System.exit(0);
 	       }        
 	    });    
@@ -103,11 +117,11 @@ public class QuoteMonitor extends TwsConnector{
 	    controlPanel = new JPanel();
 	    controlPanel.setLayout(new FlowLayout());
 
-	    mainFrame.add(headerLabel);
-	    mainFrame.add(controlPanel);
-	    mainFrame.add(scrollPane);
-	    mainFrame.add(logWindow);
-	    mainFrame.add(statusLabel);
+	    mainFrame.getContentPane().add(headerLabel);
+	    mainFrame.getContentPane().add(controlPanel);
+	    mainFrame.getContentPane().add(scrollPane);
+	    mainFrame.getContentPane().add(logWindow);
+	    mainFrame.getContentPane().add(statusLabel);
 	    mainFrame.setVisible(true);		
 	}
 	

@@ -3,14 +3,14 @@ package sigma.gui;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import java.awt.GridLayout;
-import javax.swing.JTable;
+//import java.awt.GridLayout;
+//import javax.swing.JTable;
 import javax.swing.JButton;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JCheckBox;
-import java.awt.ScrollPane;
+//import java.awt.ScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;

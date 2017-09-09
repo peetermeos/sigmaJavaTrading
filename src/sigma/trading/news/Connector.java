@@ -20,9 +20,9 @@ import sigma.utils.TraderState;
  */
 public class Connector extends TwsConnector {
 	
-	public List<NewsInstrument> instList;
-	public List<Ticker> prices;
-	public List<Trade> trades;
+	protected List<NewsInstrument> instList;
+	protected List<Ticker> prices;
+	protected List<Trade> trades;
 	
 	/**
 	 * Constructor just adds record keeping of ticker prices to twsConnector

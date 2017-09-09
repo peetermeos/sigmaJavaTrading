@@ -14,7 +14,7 @@ import sigma.utils.LogLevel;
  * Logger class for general log generation to either stdout or text file.
  * 
  * @author Peeter Meos
- * @version 1.1
+ * @version 1.2
  *
  */
 public class Logger {
@@ -55,14 +55,29 @@ public class Logger {
 	public Logger(String fname, LogLevel logLevel) {
 		this.logLevel = logLevel;
 		
-		try {
-			f = new BufferedWriter(
-					new OutputStreamWriter(
-							new FileOutputStream(fname + ".log"), "utf-8"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		if (fname != null) {
+			try {
+				f = new BufferedWriter(
+						new OutputStreamWriter(
+								new FileOutputStream(fname + ".log"), "utf-8"));
+			} catch (UnsupportedEncodingException | FileNotFoundException e) {
+				e.printStackTrace();
+			}		
+		}
+	}
+	
+	/*
+	 * Closes the logfile
+	 */
+	public void close() {
+		if (f != null)
+		{
+			try {
+				f.close();
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}		
 		}
 	}
 	
@@ -100,37 +115,36 @@ public class Logger {
 	/**
 	 * Error logging method
 	 * 
-	 * @param m_str Error text to be logged
+	 * @param str Error text to be logged
 	 */
-	public void error(String m_str) {
-		this.log(LogLevel.ERROR, m_str);
+	public void error(String str) {
+		this.log(LogLevel.ERROR, str);
 	}
 	
 	/**
 	 * Warning logging method
 	 * 
-	 * @param m_str Warning text to be logged
+	 * @param str Warning text to be logged
 	 */
-	public void warning(String m_str) {
-		this.log(LogLevel.WARN, m_str);
+	public void warning(String str) {
+		this.log(LogLevel.WARN, str);
 	}
 	
 	/**
 	 * Verbose debugging logging method
 	 * 
-	 * @param m_str Debug text to be logged
+	 * @param str Debug text to be logged
 	 */
-	public void verbose(String m_str) {
-		this.log(LogLevel.VERBOSE, m_str);
+	public void verbose(String str) {
+		this.log(LogLevel.VERBOSE, str);
 	}
 	
 	/**
 	 * Stack trace exception printout
 	 * @param e exception
 	 */
-	public void error(Exception e) {		
-		// System.out.println(e.getStackTrace().toString());
-		e.printStackTrace();
+	public void error(Exception e) {
+		this.log(LogLevel.ERROR, e.getStackTrace().toString());
 	}
 
 }
