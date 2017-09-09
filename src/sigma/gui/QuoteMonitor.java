@@ -55,13 +55,13 @@ public class QuoteMonitor {
 		    {"JDST", new Double(0), new Double(0), new Double(0), new Double(0)},
 		    {"JNUG", new Double(0), new Double(0), new Double(0), new Double(0)}
 		};
+	private JScrollPane scrollPane_2;
 	
 	
 	/**
 	 * The standard constructor. Just prepares the visuals for the GUI.
 	 */
 	public QuoteMonitor() {
-		con = new TwsConnector("Quote Monitor");
      
 		
 		// Initialize the portfolio
@@ -78,6 +78,9 @@ public class QuoteMonitor {
         this.printStream = new PrintStream(new TextAreaOutputStream(logWindow));               
         System.setOut(this.printStream);
         System.setErr(this.printStream);
+        
+        // Start TWS connector
+        con = new TwsConnector("Quote Monitor");
 	}
 	
 	/**
@@ -97,8 +100,6 @@ public class QuoteMonitor {
 	    quoteTable = new JTable(data, columnNames);
 	    scrollPane = new JScrollPane(quoteTable);
 	    quoteTable.setFillsViewportHeight(true);
-	    
-	    logWindow = new JTextArea(5, 20);
 	      
 	    mainFrame.addWindowListener(new WindowAdapter() {
 	    	
@@ -123,7 +124,12 @@ public class QuoteMonitor {
 	    mainFrame.getContentPane().add(headerLabel);
 	    mainFrame.getContentPane().add(controlPanel);
 	    mainFrame.getContentPane().add(scrollPane);
-	    mainFrame.getContentPane().add(logWindow);
+	    
+	    scrollPane_2 = new JScrollPane();
+	    mainFrame.getContentPane().add(scrollPane_2);
+	    
+	    logWindow = new JTextArea(5, 20);
+	    scrollPane_2.setViewportView(logWindow);
 	    mainFrame.getContentPane().add(statusLabel);
 	    mainFrame.setVisible(true);		
 	}
