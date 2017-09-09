@@ -28,7 +28,10 @@ import sigma.trading.Instrument;
  * @version 0.2
  *
  */
-public class QuoteMonitor extends TwsConnector {
+public class QuoteMonitor {
+	
+	private TwsConnector con;
+	
 	private JFrame mainFrame;
 	private JLabel headerLabel;
 	private JLabel statusLabel;
@@ -58,8 +61,8 @@ public class QuoteMonitor extends TwsConnector {
 	 * The standard constructor. Just prepares the visuals for the GUI.
 	 */
 	public QuoteMonitor() {
-		super("Quote Monitor");
-		     
+		con = new TwsConnector("Quote Monitor");
+     
 		
 		// Initialize the portfolio
 		portfolio = new ArrayList<>();
@@ -107,8 +110,8 @@ public class QuoteMonitor extends TwsConnector {
 	        */
 	       @Override
 	       public void windowClosing(WindowEvent windowEvent){
-	    	   if(getTws().isConnected()) {
-	    		   twsDisconnect();   
+	    	   if(con.getTws().isConnected()) {
+	    		   con.twsDisconnect();   
 	    	   }
 	           System.exit(0);
 	       }        
@@ -156,9 +159,9 @@ public class QuoteMonitor extends TwsConnector {
 	public void getData() {
 		Contract c = null;
 		String genericTickList = null;
-		Vector<TagValue> mktDataOptions = new Vector<TagValue>();
+		Vector<TagValue> mktDataOptions = new Vector<>();
 		
-		if (tws.isConnected()) {
+		if (con.isConnected()) {
 			for(Instrument i: portfolio) {
 				// create contract
 				c = new Contract();
@@ -178,9 +181,9 @@ public class QuoteMonitor extends TwsConnector {
 				}
 				
 				// request contract id
-				tws.reqContractDetails(nextOrderID, c);
+				con.getTws().reqContractDetails(con.getOrderID(), c);
 				// request live data
-				tws.reqMktData(portfolio.indexOf(i) + 1, c, genericTickList, false, mktDataOptions);
+				con.getTws().reqMktData(portfolio.indexOf(i) + 1, c, genericTickList, false, mktDataOptions);
 				
 			}
 		}
@@ -200,11 +203,11 @@ public class QuoteMonitor extends TwsConnector {
 	         
 	         if( command.equals( "Connect" ))  {
 	            statusLabel.setText("Connect Button clicked.");
-	    		twsConnect();
+	    		con.twsConnect();
 	    		getData();
 	         } else if( command.equals( "Disconnect" ) )  {
 	            statusLabel.setText("Disconnect Button clicked."); 
-	    		twsDisconnect();
+	    		con.twsDisconnect();
 	         } else {
 	            statusLabel.setText("Request Data clicked.");
 	         } 

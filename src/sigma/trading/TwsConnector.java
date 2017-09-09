@@ -258,6 +258,15 @@ public class TwsConnector implements EWrapper {
 		}
 			
 	}
+	
+	/**
+	 * Check whether the connector is in fact connected to the TWS
+	 * 
+	 * @return true if the connection to TWS is established
+	 */
+	public boolean isConnected() {
+		return(tws.isConnected());
+	}
     
 	/** 
 	 * Accessor for tws client
