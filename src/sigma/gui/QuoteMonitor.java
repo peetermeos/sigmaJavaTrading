@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import sigma.trading.TwsConnector;
 //import sigma.utils.OptSide;
 import sigma.trading.Instrument;
+import net.miginfocom.swing.MigLayout;
 
 
 /**
@@ -80,7 +81,8 @@ public class QuoteMonitor {
         System.setErr(this.printStream);
         
         // Start TWS connector
-        con = new TwsConnector("Quote Monitor");
+        con = new TwsConnector("Quote Monitor");       
+        
 	}
 	
 	/**
@@ -88,8 +90,7 @@ public class QuoteMonitor {
 	 */
 	public void prepareGUI() {
 	    mainFrame = new JFrame("Sigma Quote Monitor");
-	    mainFrame.setSize(800, 404);
-	    mainFrame.getContentPane().setLayout(new GridLayout(5, 1, 5, 5));
+	    mainFrame.setSize(805, 810);
 
 	    headerLabel = new JLabel("Header",JLabel.CENTER );
 	    
@@ -112,6 +113,10 @@ public class QuoteMonitor {
 	       @Override
 	       public void windowClosing(WindowEvent windowEvent){
 	    	   if(con.getTws().isConnected()) {
+	    		   for(int i = 0; i < portfolio.size(); i++) {
+	    			   con.getTws().cancelMktData(i + 1);
+	    		   }
+	    		   
 	    		   con.twsDisconnect();   
 	    	   }
 	           System.exit(0);
@@ -120,17 +125,18 @@ public class QuoteMonitor {
 	      
 	    controlPanel = new JPanel();
 	    controlPanel.setLayout(new FlowLayout());
+	    mainFrame.getContentPane().setLayout(new MigLayout("", "[][789px]", "[24.00px][33.00px][123.00px][522.00px][14px]"));
 
-	    mainFrame.getContentPane().add(headerLabel);
-	    mainFrame.getContentPane().add(controlPanel);
-	    mainFrame.getContentPane().add(scrollPane);
+	    mainFrame.getContentPane().add(headerLabel, "cell 1 0,grow");
+	    mainFrame.getContentPane().add(controlPanel, "cell 1 1,grow");
+	    mainFrame.getContentPane().add(scrollPane, "cell 1 2,grow");
 	    
 	    scrollPane_2 = new JScrollPane();
-	    mainFrame.getContentPane().add(scrollPane_2);
+	    mainFrame.getContentPane().add(scrollPane_2, "cell 1 3,grow");
 	    
 	    logWindow = new JTextArea(5, 20);
 	    scrollPane_2.setViewportView(logWindow);
-	    mainFrame.getContentPane().add(statusLabel);
+	    mainFrame.getContentPane().add(statusLabel, "cell 1 4,growx,aligny center");
 	    mainFrame.setVisible(true);		
 	}
 	

@@ -84,6 +84,18 @@ public class Instrument {
 		
 	}
 	
+	/**
+	 * Creates TWS contract for the instrument
+	 */
+	public void createContract() {
+		this.inst = new Contract();
+		
+		inst.symbol(this.symbol);
+		inst.exchange(this.exchange);
+		inst.secIdType(this.secType);
+		inst.lastTradeDateOrContractMonth(this.expiry);
+	}
+	
 
 	/**
 	 * @return the prvClose
