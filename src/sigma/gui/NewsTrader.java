@@ -2,6 +2,7 @@ package sigma.gui;
 
 import sigma.trading.Instrument;
 import sigma.trading.TwsConnector;
+import sigma.utils.Ticker;
 import sigma.utils.TraderState;
 
 import java.awt.EventQueue;
@@ -38,6 +39,8 @@ public class NewsTrader {
 	private JTextArea logWindow;
 	private PrintStream printStream;
 	
+	private Thread procThread;
+	
 	private List<Instrument> portfolio = null; 
 
 	String[] columnNames = {"Contract", "Bid", "Ask", "Last", "Status"};
@@ -68,12 +71,40 @@ public class NewsTrader {
 				try {
 					NewsTrader window = new NewsTrader();
 					window.frame.setVisible(true);
+								    
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
 	}
+	
+    /**
+     * Simple message processor for price updates
+     * 
+     * @author Peeter Meos
+     *
+     */
+    protected class Task implements Runnable {
+        public void run() {
+          List<Ticker> tickers = null;
+          
+          while (!Thread.currentThread().isInterrupted()){
+            // do the processing crap
+        	if (con.isConnected()) {
+        		// Get tickers and update data[][]
+        		tickers = con.getTickers();
+        		
+        		// check if anything changed
+        		// update table
+        		if (statusTable != null) {
+        			// Update table
+        		}
+        	}
+          }
+        }
+    }
+
 	
 	/**
 	 * Create the application.
@@ -86,7 +117,12 @@ public class NewsTrader {
         System.setOut(this.printStream);
         System.setErr(this.printStream);
 		
-		con = new Connector("Sigma News Trader");		
+		con = new Connector("Sigma News Trader");	
+		
+	    // Start message thread
+	    Task myTask = new Task();
+	    procThread = new Thread(myTask, "T1");
+	    procThread.start();
 	}
 
 	/**

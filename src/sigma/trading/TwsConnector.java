@@ -43,6 +43,7 @@ public class TwsConnector implements EWrapper {
     protected Thread msgThread;
     
     /**
+     * Simple message processor
      * 
      * @author Peeter Meos
      *

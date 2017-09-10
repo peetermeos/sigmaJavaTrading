@@ -30,6 +30,14 @@ public class Connector extends TwsConnector {
 	}
 
 	/**
+	 * Returns tickers to the calling method
+	 * @return List of tickers
+	 */
+	public List<Ticker> getTickers() {
+		return(tickers);
+	}
+	
+	/**
 	 * Overriden tick price method
 	 */
 	@Override
