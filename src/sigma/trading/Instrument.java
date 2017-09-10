@@ -32,12 +32,14 @@ public class Instrument {
 	/**
 	 * Constructor method for Instrument class for stocks and futures
 	 */
-	public Instrument(String m_symbol, String m_secType, String m_exchange, String m_expiry) {
-		this.symbol = m_symbol;
-		this.secType = m_secType;
+	public Instrument(String symbol, String secType, String exchange, String expiry) {
+		this.symbol = symbol;
+		this.secType = secType;
+		
+		
 		this.setUlType("");
-		this.exchange = m_exchange;
-		this.expiry = m_expiry;
+		this.exchange = exchange;
+		this.expiry = expiry;
 		this.setStrike(0.0);
 		this.setSide(OptSide.NONE);
 		
@@ -85,6 +87,15 @@ public class Instrument {
 	}
 	
 	/**
+	 * Returns string representation of the instrument
+	 * @return String 
+	 */
+	public String toString() {
+		return("Symbol: " + symbol + " exchange: " + exchange + 
+				" type: " + secType + " expiry " + expiry);
+	}
+	
+	/**
 	 * Creates TWS contract for the instrument
 	 */
 	public void createContract() {
@@ -92,7 +103,7 @@ public class Instrument {
 		
 		inst.symbol(this.symbol);
 		inst.exchange(this.exchange);
-		inst.secIdType(this.secType);
+		inst.secType(this.secType);
 		inst.lastTradeDateOrContractMonth(this.expiry);
 	}
 	

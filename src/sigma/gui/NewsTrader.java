@@ -1,25 +1,28 @@
 package sigma.gui;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-
+import sigma.trading.Instrument;
 import sigma.trading.TwsConnector;
+import sigma.utils.TraderState;
+
+import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-
 import java.awt.Insets;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * News trader working on Swing GUI
@@ -30,12 +33,32 @@ import java.io.PrintStream;
 public class NewsTrader {
 
 	private JFrame frame;
-	private TwsConnector con;
+	private Connector con;
 	private JTable statusTable;
 	private JTextArea logWindow;
 	private PrintStream printStream;
 	
+	private List<Instrument> portfolio = null; 
 
+	String[] columnNames = {"Contract", "Bid", "Ask", "Last", "Status"};
+	
+	Object[][] data = {
+		    {"CL",   0, 0, 0, TraderState.WAIT.toString()},
+		    {"RB",   0, 0, 0, TraderState.WAIT.toString()},
+		    {"SVXY", 0, 0, 0, TraderState.WAIT.toString()},
+		    {"JDST", 0, 0, 0, TraderState.WAIT.toString()},
+		    {"JNUG", 0, 0, 0, TraderState.WAIT.toString()}
+		};
+	
+	/**
+	 * TwsConnector access method
+	 * @return TwsConnector
+	 */
+	public TwsConnector getCon() {
+		return(con);
+	}
+	
+	
 	/**
 	 * Launch the application.
 	 */
@@ -63,8 +86,7 @@ public class NewsTrader {
         System.setOut(this.printStream);
         System.setErr(this.printStream);
 		
-		con = new TwsConnector("Sigma News Trader");
-		
+		con = new Connector("Sigma News Trader");		
 	}
 
 	/**
@@ -101,7 +123,7 @@ public class NewsTrader {
 		frame.getContentPane().setLayout(gridBagLayout);
 		
 		// Connect button
-		JButton btnConnect = new JButton("Connect");
+		JButton btnConnect = new JButton("Connect TWS");
 		btnConnect.setActionCommand("Connect");
 		btnConnect.addActionListener(new ButtonClickListener());
 		
@@ -112,7 +134,7 @@ public class NewsTrader {
 		frame.getContentPane().add(btnConnect, gbcBtnConnect);
 		
 		// Disconnect button
-		JButton btnDisconnect = new JButton("Disconnect");
+		JButton btnDisconnect = new JButton("Disconnect TWS");
 		btnDisconnect.setActionCommand("Disconnect");
 		btnDisconnect.addActionListener(new ButtonClickListener());
 		
@@ -152,7 +174,7 @@ public class NewsTrader {
 		gbcScrollPaneStatusTable.gridy = 3;
 		frame.getContentPane().add(scrollPaneStatusTable, gbcScrollPaneStatusTable);
 		
-		statusTable = new JTable();
+		statusTable = new JTable(data, columnNames);
 		scrollPaneStatusTable.setViewportView(statusTable);
 		
 		// Label
@@ -176,6 +198,15 @@ public class NewsTrader {
 		
 		logWindow = new JTextArea();
 		scrollPaneLogWindow.setViewportView(logWindow);
+		
+		// Initialize the portfolio
+		portfolio = new ArrayList<>();
+		portfolio.add(new Instrument("CL", "FUT", "NYMEX", "201710"));
+		portfolio.add(new Instrument("RB", "FUT", "NYMEX", "201710"));
+		portfolio.add(new Instrument("SVXY", "STK", "SMART", ""));
+		portfolio.add(new Instrument("JDST", "STK", "SMART", ""));
+		portfolio.add(new Instrument("JNUG", "STK", "SMART", ""));
+		
 	}
 	
 	/**
@@ -192,9 +223,26 @@ public class NewsTrader {
 	         
 	         if( command.equals( "Connect" ))  {
 	    		con.twsConnect();
+	    		
+	    		while(!con.isConnected()) {};
+	    		
+	    		// Request data
+	    		for(int i=0; i < portfolio.size(); i++) {
+	    			portfolio.get(i).createContract();
+	    			con.log(portfolio.get(i).toString());
+	    			con.reqMktData(i, portfolio.get(i).getInst());
+	    		}
 	         } else if( command.equals( "Disconnect" ) )  {
+	        	 // Order cancellations need to go here
 	    		con.twsDisconnect();
+	         } else if( command.equals( "Exit" ) )  {
+	        	 // Order cancellations need to be added here
+	        	 if(con.getTws().isConnected()) {	    		   
+		    		   con.twsDisconnect();   
+		    	   }
+		           System.exit(0);
 	         } else {
+	        	 // Do nothing
 	         } 
 		}		
 	}
