@@ -87,6 +87,7 @@ public class NewsTrader {
      */
     protected class Task implements Runnable {
         public void run() {
+          Boolean changed = false;	
           List<Ticker> tickers = null;
           
           while (!Thread.currentThread().isInterrupted()){
@@ -96,9 +97,18 @@ public class NewsTrader {
         		tickers = con.getTickers();
         		
         		// check if anything changed
+        		// if yes. then update
+        		for(int i = 0; i < tickers.size(); i++) {
+        			if (tickers.get(i).getBid()   != (double) data[i][1]) { data[i][1] = tickers.get(i).getBid(); changed = true;}
+        			if (tickers.get(i).getAsk()   != (double) data[i][2]) { data[i][2] = tickers.get(i).getAsk(); changed = true;}
+        			if (tickers.get(i).getPrice() != (double) data[i][3]) { data[i][3] = tickers.get(i).getPrice(); changed = true;}
+        		}
         		// update table
-        		if (statusTable != null) {
+        		if (statusTable != null & changed) {
         			// Update table
+        			//statusTable.refresh(data);
+        			statusTable.revalidate();
+        			changed = false;
         		}
         	}
           }
@@ -120,9 +130,9 @@ public class NewsTrader {
 		con = new Connector("Sigma News Trader");	
 		
 	    // Start message thread
-	    Task myTask = new Task();
-	    procThread = new Thread(myTask, "T1");
-	    procThread.start();
+	    //Task myTask = new Task();
+	    //procThread = new Thread(myTask, "T1");
+	    //procThread.start();
 	}
 
 	/**

@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Date;
 import sigma.utils.LogLevel;
 
@@ -144,7 +145,7 @@ public class Logger {
 	 * @param e exception
 	 */
 	public void error(Exception e) {
-		this.log(LogLevel.ERROR, e.getStackTrace().toString());
+		this.log(LogLevel.ERROR, Arrays.toString(e.getStackTrace()));
 	}
 
 }
