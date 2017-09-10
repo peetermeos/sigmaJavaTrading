@@ -52,6 +52,7 @@ public class NewsTrader {
 		    {"JDST", 0, 0, 0, TraderState.WAIT.toString()},
 		    {"JNUG", 0, 0, 0, TraderState.WAIT.toString()}
 		};
+	private JTable table;
 	
 	/**
 	 * TwsConnector access method
@@ -159,13 +160,13 @@ public class NewsTrader {
 		  }); 
 		    
 	    // General layout
-		frame.setBounds(100, 100, 820, 620);
+		frame.setBounds(100, 100, 820, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{10, 0, 0, 0, 0, 10};
-		gridBagLayout.rowHeights = new int[]{10, 10, 23, 100, 10, 300, 10};
-		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[]{10, 0, 0, 0, 10};
+		gridBagLayout.rowHeights = new int[]{10, 10, 23, 130, 0, 130, 10, 300, 10};
+		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
 		// Connect button
@@ -196,7 +197,7 @@ public class NewsTrader {
 		btnExit.addActionListener(new ButtonClickListener());
 		
 		GridBagConstraints gbcBtnExit = new GridBagConstraints();
-		gbcBtnExit.insets = new Insets(0, 0, 5, 5);
+		gbcBtnExit.insets = new Insets(0, 0, 5, 0);
 		gbcBtnExit.gridx = 3;
 		gbcBtnExit.gridy = 1;
 		frame.getContentPane().add(btnExit, gbcBtnExit);
@@ -215,7 +216,7 @@ public class NewsTrader {
 		GridBagConstraints gbcScrollPaneStatusTable = new GridBagConstraints();
 		gbcScrollPaneStatusTable.fill = GridBagConstraints.BOTH;
 		gbcScrollPaneStatusTable.gridwidth = 3;
-		gbcScrollPaneStatusTable.insets = new Insets(0, 0, 5, 5);
+		gbcScrollPaneStatusTable.insets = new Insets(0, 0, 5, 0);
 		gbcScrollPaneStatusTable.gridx = 1;
 		gbcScrollPaneStatusTable.gridy = 3;
 		frame.getContentPane().add(scrollPaneStatusTable, gbcScrollPaneStatusTable);
@@ -223,23 +224,42 @@ public class NewsTrader {
 		statusTable = new JTable(data, columnNames);
 		scrollPaneStatusTable.setViewportView(statusTable);
 		
+		JLabel lblNewLabel = new JLabel("Order Status");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 1;
+		gbc_lblNewLabel.gridy = 4;
+		frame.getContentPane().add(lblNewLabel, gbc_lblNewLabel);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridwidth = 3;
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollPane.gridx = 1;
+		gbc_scrollPane.gridy = 5;
+		frame.getContentPane().add(scrollPane, gbc_scrollPane);
+		
+		table = new JTable();
+		scrollPane.setViewportView(table);
+		
 		// Label
 		JLabel lblTraderLog = new JLabel("Trader log");
 		GridBagConstraints gbclblTraderLog = new GridBagConstraints();
 		gbclblTraderLog.anchor = GridBagConstraints.WEST;
 		gbclblTraderLog.insets = new Insets(0, 0, 5, 5);
 		gbclblTraderLog.gridx = 1;
-		gbclblTraderLog.gridy = 4;
+		gbclblTraderLog.gridy = 6;
 		frame.getContentPane().add(lblTraderLog, gbclblTraderLog);
 		
 		// Log window
 		JScrollPane scrollPaneLogWindow = new JScrollPane();
 		GridBagConstraints gbcScrollPaneLogWindow = new GridBagConstraints();
-		gbcScrollPaneLogWindow.insets = new Insets(0, 0, 0, 5);
 		gbcScrollPaneLogWindow.gridwidth = 3;
 		gbcScrollPaneLogWindow.fill = GridBagConstraints.BOTH;
 		gbcScrollPaneLogWindow.gridx = 1;
-		gbcScrollPaneLogWindow.gridy = 5;
+		gbcScrollPaneLogWindow.gridy = 7;
 		frame.getContentPane().add(scrollPaneLogWindow, gbcScrollPaneLogWindow);
 		
 		logWindow = new JTextArea();
