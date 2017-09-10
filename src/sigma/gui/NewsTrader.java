@@ -6,15 +6,20 @@ import javax.swing.JFrame;
 
 import sigma.trading.TwsConnector;
 import java.awt.GridBagLayout;
-import javax.swing.JTextPane;
 import java.awt.GridBagConstraints;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+
 import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.PrintStream;
 
 /**
  * News trader working on Swing GUI
@@ -26,7 +31,9 @@ public class NewsTrader {
 
 	private JFrame frame;
 	private TwsConnector con;
-	private JTable table;
+	private JTable statusTable;
+	private JTextArea logWindow;
+	private PrintStream printStream;
 	
 
 	/**
@@ -44,13 +51,20 @@ public class NewsTrader {
 			}
 		});
 	}
-
+	
 	/**
 	 * Create the application.
 	 */
 	public NewsTrader() {
 		initialize();
-		con = new TwsConnector();
+		
+		// Wonder if the reassignment of logging works?
+        this.printStream = new PrintStream(new TextAreaOutputStream(logWindow));               
+        System.setOut(this.printStream);
+        System.setErr(this.printStream);
+		
+		con = new TwsConnector("Sigma News Trader");
+		
 	}
 
 	/**
@@ -58,12 +72,26 @@ public class NewsTrader {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.getContentPane().addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-			}
-		});
-		frame.setBounds(100, 100, 814, 624);
+			
+	    frame.addWindowListener(new WindowAdapter() {
+	    	
+	       /**
+	        * Window close event handler.
+	        * Closes twsConnection and exits.
+	        * 
+	        * @param windowEvent
+	        */
+	       @Override
+	       public void windowClosing(WindowEvent windowEvent){
+	    	   if(con.getTws().isConnected()) {	    		   
+	    		   con.twsDisconnect();   
+	    	   }
+	           System.exit(0);
+	       }        
+		  }); 
+		    
+	    // General layout
+		frame.setBounds(100, 100, 820, 620);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{10, 0, 0, 0, 0, 10};
@@ -72,66 +100,103 @@ public class NewsTrader {
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
+		// Connect button
 		JButton btnConnect = new JButton("Connect");
-		GridBagConstraints gbc_btnConnect = new GridBagConstraints();
-		gbc_btnConnect.insets = new Insets(0, 0, 5, 5);
-		gbc_btnConnect.gridx = 1;
-		gbc_btnConnect.gridy = 1;
-		frame.getContentPane().add(btnConnect, gbc_btnConnect);
+		btnConnect.setActionCommand("Connect");
+		btnConnect.addActionListener(new ButtonClickListener());
 		
+		GridBagConstraints gbcBtnConnect = new GridBagConstraints();
+		gbcBtnConnect.insets = new Insets(0, 0, 5, 5);
+		gbcBtnConnect.gridx = 1;
+		gbcBtnConnect.gridy = 1;
+		frame.getContentPane().add(btnConnect, gbcBtnConnect);
+		
+		// Disconnect button
 		JButton btnDisconnect = new JButton("Disconnect");
-		GridBagConstraints gbc_btnDisconnect = new GridBagConstraints();
-		gbc_btnDisconnect.insets = new Insets(0, 0, 5, 5);
-		gbc_btnDisconnect.gridx = 2;
-		gbc_btnDisconnect.gridy = 1;
-		frame.getContentPane().add(btnDisconnect, gbc_btnDisconnect);
+		btnDisconnect.setActionCommand("Disconnect");
+		btnDisconnect.addActionListener(new ButtonClickListener());
 		
+		GridBagConstraints gbcBtnDisconnect = new GridBagConstraints();
+		gbcBtnDisconnect.insets = new Insets(0, 0, 5, 5);
+		gbcBtnDisconnect.gridx = 2;
+		gbcBtnDisconnect.gridy = 1;
+		frame.getContentPane().add(btnDisconnect, gbcBtnDisconnect);
+		
+		// Exit button
 		JButton btnExit = new JButton("Exit");
-		GridBagConstraints gbc_btnExit = new GridBagConstraints();
-		gbc_btnExit.insets = new Insets(0, 0, 5, 5);
-		gbc_btnExit.gridx = 3;
-		gbc_btnExit.gridy = 1;
-		frame.getContentPane().add(btnExit, gbc_btnExit);
+		btnExit.setActionCommand("Exit");
+		btnExit.addActionListener(new ButtonClickListener());
 		
-		JLabel lblTraderStatus = new JLabel("Trader status");
-		GridBagConstraints gbc_lblTraderStatus = new GridBagConstraints();
-		gbc_lblTraderStatus.anchor = GridBagConstraints.WEST;
-		gbc_lblTraderStatus.insets = new Insets(0, 0, 5, 5);
-		gbc_lblTraderStatus.gridx = 1;
-		gbc_lblTraderStatus.gridy = 2;
-		frame.getContentPane().add(lblTraderStatus, gbc_lblTraderStatus);
+		GridBagConstraints gbcBtnExit = new GridBagConstraints();
+		gbcBtnExit.insets = new Insets(0, 0, 5, 5);
+		gbcBtnExit.gridx = 3;
+		gbcBtnExit.gridy = 1;
+		frame.getContentPane().add(btnExit, gbcBtnExit);
 		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
-		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_1.gridwidth = 3;
-		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 5);
-		gbc_scrollPane_1.gridx = 1;
-		gbc_scrollPane_1.gridy = 3;
-		frame.getContentPane().add(scrollPane_1, gbc_scrollPane_1);
+		// Label
+		JLabel lblTraderStatus = new JLabel("Trader portfolio status");
+		GridBagConstraints gbcLblTraderStatus = new GridBagConstraints();
+		gbcLblTraderStatus.anchor = GridBagConstraints.WEST;
+		gbcLblTraderStatus.insets = new Insets(0, 0, 5, 5);
+		gbcLblTraderStatus.gridx = 1;
+		gbcLblTraderStatus.gridy = 2;
+		frame.getContentPane().add(lblTraderStatus, gbcLblTraderStatus);
 		
-		table = new JTable();
-		scrollPane_1.setViewportView(table);
+		// Portfolio table
+		JScrollPane scrollPaneStatusTable = new JScrollPane();
+		GridBagConstraints gbcScrollPaneStatusTable = new GridBagConstraints();
+		gbcScrollPaneStatusTable.fill = GridBagConstraints.BOTH;
+		gbcScrollPaneStatusTable.gridwidth = 3;
+		gbcScrollPaneStatusTable.insets = new Insets(0, 0, 5, 5);
+		gbcScrollPaneStatusTable.gridx = 1;
+		gbcScrollPaneStatusTable.gridy = 3;
+		frame.getContentPane().add(scrollPaneStatusTable, gbcScrollPaneStatusTable);
 		
+		statusTable = new JTable();
+		scrollPaneStatusTable.setViewportView(statusTable);
+		
+		// Label
 		JLabel lblTraderLog = new JLabel("Trader log");
-		GridBagConstraints gbc_lblTraderLog = new GridBagConstraints();
-		gbc_lblTraderLog.anchor = GridBagConstraints.WEST;
-		gbc_lblTraderLog.insets = new Insets(0, 0, 5, 5);
-		gbc_lblTraderLog.gridx = 1;
-		gbc_lblTraderLog.gridy = 4;
-		frame.getContentPane().add(lblTraderLog, gbc_lblTraderLog);
+		GridBagConstraints gbclblTraderLog = new GridBagConstraints();
+		gbclblTraderLog.anchor = GridBagConstraints.WEST;
+		gbclblTraderLog.insets = new Insets(0, 0, 5, 5);
+		gbclblTraderLog.gridx = 1;
+		gbclblTraderLog.gridy = 4;
+		frame.getContentPane().add(lblTraderLog, gbclblTraderLog);
 		
-		JScrollPane scrollPane = new JScrollPane();
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
-		gbc_scrollPane.gridwidth = 3;
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 1;
-		gbc_scrollPane.gridy = 5;
-		frame.getContentPane().add(scrollPane, gbc_scrollPane);
+		// Log window
+		JScrollPane scrollPaneLogWindow = new JScrollPane();
+		GridBagConstraints gbcScrollPaneLogWindow = new GridBagConstraints();
+		gbcScrollPaneLogWindow.insets = new Insets(0, 0, 0, 5);
+		gbcScrollPaneLogWindow.gridwidth = 3;
+		gbcScrollPaneLogWindow.fill = GridBagConstraints.BOTH;
+		gbcScrollPaneLogWindow.gridx = 1;
+		gbcScrollPaneLogWindow.gridy = 5;
+		frame.getContentPane().add(scrollPaneLogWindow, gbcScrollPaneLogWindow);
 		
-		JTextPane textPane = new JTextPane();
-		scrollPane.setViewportView(textPane);
+		logWindow = new JTextArea();
+		scrollPaneLogWindow.setViewportView(logWindow);
+	}
+	
+	/**
+	 * The simple button click listener method.
+	 * 
+	 * @author Peeter Meos
+	 * @version 0.1
+	 *
+	 */
+	private class ButtonClickListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+	         String command = e.getActionCommand();  
+	         
+	         if( command.equals( "Connect" ))  {
+	    		con.twsConnect();
+	         } else if( command.equals( "Disconnect" ) )  {
+	    		con.twsDisconnect();
+	         } else {
+	         } 
+		}		
 	}
 
 }
