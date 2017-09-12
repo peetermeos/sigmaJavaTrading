@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
-
+import sigma.utils.Logger;
 /**
  * 
  * @author Peeter Meos
@@ -14,15 +14,19 @@ import java.sql.ResultSet;
  */
 public class Database {
 
-	Connection conn = null;
-	Statement stmt = null;
-	ResultSet rs = null;
+	protected Connection conn = null;
+	protected Statement stmt = null;
+	protected ResultSet rs = null;
+	
+	protected Logger logger;
 
 	
 	/**
 	 * 
 	 */
 	public Database() {
+		logger = new Logger();
+		
 		try {
 		    conn =
 		       DriverManager.getConnection("jdbc:mysql://localhost/test?" +
@@ -42,9 +46,9 @@ public class Database {
 		//   ...
 		} catch (SQLException ex) {
 		    // handle any errors
-		    System.out.println("SQLException: " + ex.getMessage());
-		    System.out.println("SQLState: " + ex.getSQLState());
-		    System.out.println("VendorError: " + ex.getErrorCode());
+		    logger.log("SQLException: " + ex.getMessage());
+		    logger.log("SQLState: " + ex.getSQLState());
+		    logger.log("VendorError: " + ex.getErrorCode());
 		}
 		finally {
 		    // it is a good idea to release
