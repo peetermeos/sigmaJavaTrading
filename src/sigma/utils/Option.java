@@ -34,6 +34,7 @@ public class Option {
 	public Option() {
 		this.r = 1.0;
 		this.q = 0.0;
+		this.sigma = 0;
 	}
 	
 	/**
