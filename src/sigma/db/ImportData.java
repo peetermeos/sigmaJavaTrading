@@ -32,8 +32,8 @@ public class ImportData extends TwsConnector {
 	protected Statement stmt = null;
 	protected ResultSet rs = null;
 	
-	private String server = "mysql";
-	private String db = "db";
+	private String server = "sigma-db.cq2omyeocnub.us-east-1.rds.amazonaws.com";
+	private String db = "trading";
 	private String uid = "user";
 	private String pwd = "pwd";
 	
