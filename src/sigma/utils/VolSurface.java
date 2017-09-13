@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sigma.optimiser;
+package sigma.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,9 +20,6 @@ import com.ib.client.Types.Right;
 import com.ib.client.Types.SecType;
 
 import sigma.trading.TwsConnector;
-import sigma.utils.Helper;
-import sigma.utils.OptSide;
-import sigma.utils.Option;
 
 /**
  * @author Peeter Meos
@@ -54,6 +51,45 @@ public class VolSurface extends TwsConnector{
 	 */
 	public List<Option> getSurface() {
 		return(surface);
+	}
+	
+	/**
+	 * Returns vector of gamma
+	 * @return double[] of gamma
+	 */
+	public double[] getGamma() {
+		double x[] = new double[surface.size()];
+		
+		for(int i=0; i<surface.size();i++) {
+			x[i] = surface.get(i).getGamma();
+		}
+		return(x);
+	}
+	
+	/**
+	 * Returns vector of theta
+	 * @return double[] of theta
+	 */
+	public double[] getTheta() {
+		double x[] = new double[surface.size()];
+		
+		for(int i=0; i<surface.size();i++) {
+			x[i] = surface.get(i).getTheta();
+		}
+		return(x);		
+	}
+	
+	/**
+	 * Returns vector of delta
+	 * @return double[] of delta
+	 */
+	public double[] getDelta() {
+		double x[] = new double[surface.size()];
+		
+		for(int i=0; i<surface.size();i++) {
+			x[i] = surface.get(i).getDelta();
+		}
+		return(x);		
 	}
 	
 	/**
@@ -146,22 +182,6 @@ public class VolSurface extends TwsConnector{
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
 		// Nothing to see here, tick price is not needed
-	}
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		VolSurface v;
-				
-		v = new VolSurface();
-		v.reqSurface();
-		
-		Helper.sleep(60000);
-		v.twsDisconnect();
-		
-		v.log(v.toString());
-
 	}
 
 }

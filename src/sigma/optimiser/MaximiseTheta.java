@@ -17,9 +17,9 @@ import cern.colt.matrix.tdouble.DoubleMatrix2D;
  */
 public class MaximiseTheta {
 	
-	private DoubleFactory1D objCoef;
-	private DoubleFactory1D RHSCoef;
-	private DoubleFactory2D AMatrix;
+	private DoubleMatrix1D objCoef;
+	private DoubleMatrix1D RHSCoef;
+	private DoubleMatrix2D AMatrix;
 	
 	/**
 	 * Constructor for MaximiseTheta
@@ -67,57 +67,57 @@ public class MaximiseTheta {
 	}
 
 
-
 	/**
 	 * @return the objCoef
 	 */
-	public DoubleFactory1D getObjCoef() {
+	public DoubleMatrix1D getObjCoef() {
 		return objCoef;
 	}
-
 
 
 	/**
 	 * @param objCoef the objCoef to set
 	 */
-	public void setObjCoef(DoubleFactory1D objCoef) {
-		this.objCoef = objCoef;
+	public void setObjCoef(double[] objCoef) {
+		DoubleFactory1D F1 = DoubleFactory1D.sparse;
+		
+		this.objCoef = F1.make(objCoef);
 	}
-
 
 
 	/**
 	 * @return the rHSCoef
 	 */
-	public DoubleFactory1D getRHSCoef() {
+	public DoubleMatrix1D getRHSCoef() {
 		return RHSCoef;
 	}
-
 
 
 	/**
 	 * @param rHSCoef the rHSCoef to set
 	 */
-	public void setRHSCoef(DoubleFactory1D rHSCoef) {
-		RHSCoef = rHSCoef;
+	public void setRHSCoef(double[] rHSCoef) {
+		DoubleFactory1D F1 = DoubleFactory1D.sparse;
+		
+		RHSCoef = F1.make(rHSCoef);
 	}
-
 
 
 	/**
 	 * @return the aMatrix
 	 */
-	public DoubleFactory2D getAMatrix() {
+	public DoubleMatrix2D getAMatrix() {
 		return AMatrix;
 	}
-
 
 
 	/**
 	 * @param aMatrix the aMatrix to set
 	 */
-	public void setAMatrix(DoubleFactory2D aMatrix) {
-		AMatrix = aMatrix;
+	public void setAMatrix(double[][] aMatrix) {
+		DoubleFactory2D F2 = DoubleFactory2D.sparse;
+		
+		AMatrix = F2.make(aMatrix);
 	}
 
 }
