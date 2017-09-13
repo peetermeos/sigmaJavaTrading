@@ -8,17 +8,25 @@ import cern.jet.stat.tdouble.Probability;
  * Includes also selection of third order Greeks.
  * 
  * @author Peeter Meos
- * @version 0.1
+ * @version 0.2
  *
  */
 public class Option {
+	private int id; // ID sequence
 	private double sigma; // Volatility
 	private double K; // Strike
 	private double S; // Spot
 	private double t; // Maturity
 	private double r; // Risk free rate
 	private double q; // Annual dividend yield
+	private String expiry;
 	private OptSide side;
+	
+	private double price;
+	private double delta;
+	private double gamma;
+	private double theta;
+	private double vega;
 	
 	/**
 	 * Default constructor for the option
@@ -26,6 +34,24 @@ public class Option {
 	public Option() {
 		this.r = 1.0;
 		this.q = 0.0;
+	}
+	
+	/**
+	 * Constructor that assumes that risk free rates and dividend rates are zero
+	 * @param id
+	 * @param strike
+	 * @param spot
+	 * @param expiry
+	 * @param side
+	 */
+	public Option(int id, double strike, double spot, String expiry, OptSide side) {
+		this.K = strike;
+		this.S = spot;
+		this.side = side;
+		this.expiry = expiry;
+		this.id = id;
+		this.q = 0;
+		this.r = 0;
 	}
 	
 	/**
@@ -332,5 +358,103 @@ public class Option {
 	 */
 	public void setQ(double q) {
 		this.q = q;
+	}
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the expiry
+	 */
+	public String getExpiry() {
+		return expiry;
+	}
+
+	/**
+	 * @param expiry the expiry to set
+	 */
+	public void setExpiry(String expiry) {
+		this.expiry = expiry;
+	}
+
+	/**
+	 * @return the delta
+	 */
+	public double getDelta() {
+		return delta;
+	}
+
+	/**
+	 * @param delta the delta to set
+	 */
+	public void setDelta(double delta) {
+		this.delta = delta;
+	}
+
+	/**
+	 * @return the gamma
+	 */
+	public double getGamma() {
+		return gamma;
+	}
+
+	/**
+	 * @param gamma the gamma to set
+	 */
+	public void setGamma(double gamma) {
+		this.gamma = gamma;
+	}
+
+	/**
+	 * @return the theta
+	 */
+	public double getTheta() {
+		return theta;
+	}
+
+	/**
+	 * @param theta the theta to set
+	 */
+	public void setTheta(double theta) {
+		this.theta = theta;
+	}
+
+	/**
+	 * @return the vega
+	 */
+	public double getVega() {
+		return vega;
+	}
+
+	/**
+	 * @param vega the vega to set
+	 */
+	public void setVega(double vega) {
+		this.vega = vega;
+	}
+
+	/**
+	 * @return the price
+	 */
+	public double getPrice() {
+		return price;
+	}
+
+	/**
+	 * @param price the price to set
+	 */
+	public void setPrice(double price) {
+		this.price = price;
 	}
 }
